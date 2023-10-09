@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">jmb_bms</string>
+    <string name="Main_menu_chat">Chat</string>
+    <string name="Main_menu_orders">Orders</string>
+    <string name="Main_menu_Point_mng">Point Management</string>
+    <string name="Main_menu_team">Team</string>
+    <string name="Main_menu_settings">Settings</string>
+    <string name="element_text">something</string>
 </resources>
