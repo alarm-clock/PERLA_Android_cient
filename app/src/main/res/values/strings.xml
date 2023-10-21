@@ -6,4 +6,12 @@
     <string name="Main_menu_team">Team</string>
     <string name="Main_menu_settings">Settings</string>
     <string name="element_text">something</string>
+    <string name="teamScHostString">host</string>
+    <string name="teamsScPortString">port</string>
+    <string name="teamScConShareBtnText">Connect and Share location</string>
+    <string name="teamScConBtnText">Connect</string>
+    <string name="teamScFillHeadlineString">Team server Information</string>
+    <string name="TeamSCShare_location">Share location</string>
+    <string name="TeamSCconnect_to_server">Connect to server</string>
+    <string name="TeamSCedit">Edit</string>
 </resources>

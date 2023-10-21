@@ -3,32 +3,32 @@
           xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
             android:allowBackup="true"
             android:dataExtractionRules="@xml/data_extraction_rules"
             android:fullBackupContent="@xml/backup_rules"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/bms_working_icon"
             android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round"
+            android:roundIcon="@mipmap/bms_working_icon_round"
             android:supportsRtl="true"
-            android:theme="@style/Theme.Jmb_bms"
+            android:theme="@style/Theme.AppCompat"
             tools:targetApi="31">
         <activity
                 android:name=".MainActivity"
-                android:exported="true"
-                android:label="@string/app_name"
-                android:theme="@style/Theme.Jmb_bms">
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="locus.api.android.INTENT_ITEM_GET_LOCATION" />
+                <action android:name="locus.api.android.INTENT_ITEM_MAIN_FUNCTION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="locus.api.android.INTENT_ITEM_MAIN_FUNCTION" />
+                <action android:name="locus.api.android.INTENT_ITEM_GET_LOCATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
@@ -40,6 +40,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".TeamScreen" ></activity>
+        <service android:name=".PeriodicBackroundPositionUpdater"></service>
     </application>
-
 </manifest>

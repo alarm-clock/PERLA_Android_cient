@@ -1,51 +1,72 @@
 package com.example.jmb_bms
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.jmb_bms.model.Affirmation
-import com.example.jmb_bms.ui.theme.Jmb_bmsTheme
-import locus.api.android.utils.IntentHelper
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.layout.ContentScale
-
-
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.example.jmb_bms.data.ListData
+import locus.api.android.objects.LocusVersion
+import locus.api.android.utils.IntentHelper
+import locus.api.android.utils.LocusUtils
+import locus.api.objects.extra.Location
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.main_menu)
+        val version = LocusUtils.getAvailableVersions(this)
+        if( version.isEmpty() ) return
 
-        val dataset = arrayOf("Chat" , "Orders" , "Team" , "Settings" , "Points Management")
-        val customAdapter = MainMenuCustomAdapter(ListData().loadAffirmaions())
-        customAdapter.onItemClick = {
-            println(it.stringId)
+        if(IntentHelper.isIntentMainFunction(intent))
+        {
+            IntentHelper.handleIntentMainFunction(this,intent, object : IntentHelper.OnIntentReceived{
+
+                override fun onReceived(lv: LocusVersion, locGps: Location?, locMapCenter: Location?) {
+                    setContentView(R.layout.main_menu)
+
+                    //val dataset = arrayOf("Chat" , "Orders" , "Team" , "Settings" , "Points Management")
+                    val customAdapter = MainMenuCustomAdapter(ListData().loadAffirmaions())
+                    customAdapter.onItemClick = {
+                        println(it.id)
+                    }
+
+                    val recyclerView: RecyclerView = findViewById(R.id.recView)
+                    recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+                    recyclerView.adapter = customAdapter
+                }
+
+                override fun onFailed() {
+
+                }
+            })
+
         }
+        else if( IntentHelper.isIntentPointTools(intent))
+        {
+            setContentView(R.layout.main_menu)
 
-        val recyclerView: RecyclerView = findViewById(R.id.recView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = customAdapter
+            //val dataset = arrayOf("Chat" , "Orders" , "Team" , "Settings" , "Points Management")
+            val customAdapter = MainMenuCustomAdapter(ListData().loadAffirmaions())
+            customAdapter.onItemClick = {
+                println(it.id)
+                if(it.id == 5){
+                    val intentTeamScreen = Intent(this , TeamScreen::class.java )
+                    startActivity(intentTeamScreen)
+                }
+            }
+
+            val recyclerView: RecyclerView = findViewById(R.id.recView)
+            recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+            recyclerView.adapter = customAdapter
+        }
+        else
+        {
+            LocusUtils.callStartLocusMap(this)
+        }
 
     }
 }
