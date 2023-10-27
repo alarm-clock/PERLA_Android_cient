@@ -18,8 +18,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val version = LocusUtils.getAvailableVersions(this)
-        if( version.isEmpty() ) return
+        LocusVersionHolder.checkAndSotreLocVer(this)
+
+        if( LocusVersionHolder.getLv() == null ) return
 
         if(IntentHelper.isIntentMainFunction(intent))
         {

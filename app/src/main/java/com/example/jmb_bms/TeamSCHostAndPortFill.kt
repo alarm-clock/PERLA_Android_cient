@@ -1,8 +1,11 @@
 package com.example.jmb_bms
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +19,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.jmb_bms.data.TeamSCData
+import io.ktor.client.*
+import io.ktor.client.plugins.websocket.*
+import io.ktor.http.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.runBlocking
 import java.lang.NumberFormatException
+import kotlin.concurrent.thread
 
 class TeamSCHostAndPortFill() : Fragment(R.layout.team_screen_filling_ip_and_port) {
 
@@ -28,18 +37,11 @@ class TeamSCHostAndPortFill() : Fragment(R.layout.team_screen_filling_ip_and_por
     private lateinit var teamSCData : TeamSCData
     private var hasIp = false
     private var hasPort = false
+    private lateinit var activity : TeamScreen
 
     private fun isEditEmpty( editText: EditText) : Boolean
     {
         return editText.text.toString().trim().isEmpty()
-    }
-
-    fun changeForMainFrag()
-    {
-        parentFragmentManager.beginTransaction()
-            .remove((requireActivity() as TeamScreen).fragFill)
-            .add(R.id.teamSCFrame2,(requireActivity() as TeamScreen).fragMain)
-            .commit()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +56,7 @@ class TeamSCHostAndPortFill() : Fragment(R.layout.team_screen_filling_ip_and_por
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        this.activity = requireActivity() as TeamScreen
         super.onViewCreated(view, savedInstanceState)
         println("In on View Created function")
         teamSCData = (requireActivity() as TeamScreen).teamSCData
@@ -76,6 +79,14 @@ class TeamSCHostAndPortFill() : Fragment(R.layout.team_screen_filling_ip_and_por
             conAndShBtn.isEnabled = false
             conBtn.isEnabled = false
         }
+        if( Errors.hasErr())
+        {
+            errTxt.text = Errors.getLastConErrAndResetErr().toString()
+        } else
+        {
+            errTxt.text = ""
+        }
+
     }
     @SuppressLint("SetTextI18n")
     override fun onStart() {
@@ -113,7 +124,7 @@ class TeamSCHostAndPortFill() : Fragment(R.layout.team_screen_filling_ip_and_por
             }
         }
         conBtn.setOnClickListener {
-            teamSCData.hasConnect()
+
             teamSCData.editHost(editHostTxt.text.toString())
 
             try {
@@ -123,8 +134,22 @@ class TeamSCHostAndPortFill() : Fragment(R.layout.team_screen_filling_ip_and_por
                 errTxt.text = "Port must be number"
                 return@setOnClickListener
             }
-            errTxt.text = ""
-            changeForMainFrag()
+
+            (requireActivity() as TeamScreen).startForegroundService(
+                Intent(
+                    activity,
+                    PeriodicBackroundPositionUpdater::class.java
+                )
+            )
+            activity.startServiceAndBind()
+
+            if( Errors.hasErr() )
+            {
+                errTxt.text = Errors.getLastConErrAndResetErr().toString()
+                return@setOnClickListener
+            }
+            else errTxt.text = ""
+            activity.changeFragments(this,activity.fragConn)
 
         //connection routine
         }
@@ -140,9 +165,18 @@ class TeamSCHostAndPortFill() : Fragment(R.layout.team_screen_filling_ip_and_por
                 return@setOnClickListener
             }
             errTxt.text = ""
-            (requireActivity() as TeamScreen).startService(Intent(activity,PeriodicBackroundPositionUpdater::class.java))
-            teamSCData.hasConnect()
-            changeForMainFrag()
+
+            activity.startServiceAndBind()
+
+            if( Errors.hasErr() )
+            {
+                errTxt.text = Errors.getLastConErrAndResetErr().toString()
+                return@setOnClickListener
+            } else errTxt.text = ""
+
+
+
+            activity.changeFragments(this,activity.fragConn)
 
             //connection and sharing routine
         }

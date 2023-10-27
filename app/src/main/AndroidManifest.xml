@@ -41,6 +41,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".TeamScreen" ></activity>
-        <service android:name=".PeriodicBackroundPositionUpdater"></service>
+        <service android:name=".PeriodicBackroundPositionUpdater" android:foregroundServiceType="location">
+        </service>
     </application>
 </manifest>
