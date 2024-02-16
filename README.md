@@ -31,6 +31,6 @@ TODO list
 
 
 
-This list will be updated during development.
+This list will be updated during development. Project is still in early stages of development.
 
 
