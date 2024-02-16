@@ -1,20 +1,57 @@
 package com.example.jmb_bms
 
-import android.content.Intent
+import android.app.Application
+import android.content.ComponentName
+import android.content.ServiceConnection
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
+import android.os.IBinder
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
-import com.example.jmb_bms.data.ListData
+import androidx.lifecycle.ViewModelProvider
+import com.example.jmb_bms.model.LocationRepo
+import com.example.jmb_bms.model.MainMenuItems
+import com.example.jmb_bms.view.mainMenu
+import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromLocFact
+import com.example.jmb_bms.viewModel.LiveTime
+import kotlinx.coroutines.runBlocking
+
 import locus.api.android.objects.LocusVersion
 import locus.api.android.utils.IntentHelper
 import locus.api.android.utils.LocusUtils
 import locus.api.objects.extra.Location
 
 class MainActivity : AppCompatActivity() {
+
+
+    private lateinit var service: PeriodicBackroundPositionUpdater
+    private var bound: Boolean = false
+
+    private val currentTime by viewModels<LiveTime>()
+
+    private lateinit var locationRepo : LocationRepo
+
+    private lateinit var menuItems: MainMenuItems
+
+    /*by viewModels<LiveLocationFromLoc>{
+        LiveLocationFromLocFact(locationRepo)
+    }*/
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(p0: ComponentName, p1: IBinder) {
+
+            val binder = p1 as PeriodicBackroundPositionUpdater.LocalBinder
+            this@MainActivity.service = binder.getService()
+            println("onServiceConnected: setting bound to true")
+            bound = true
+        }
+
+        override fun onServiceDisconnected(p0: ComponentName?) {
+            bound =false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -22,22 +59,26 @@ class MainActivity : AppCompatActivity() {
 
         if( LocusVersionHolder.getLv() == null ) return
 
+
+        locationRepo = LocationRepo(applicationContext)
+
+        val currentLocation by viewModels<LiveLocationFromLoc> {
+            LiveLocationFromLoc.create(locationRepo)
+        }
+
+        menuItems = MainMenuItems(getSharedPreferences("jmb_bms_MainMenu", MODE_PRIVATE))
+
+
         if(IntentHelper.isIntentMainFunction(intent))
         {
             IntentHelper.handleIntentMainFunction(this,intent, object : IntentHelper.OnIntentReceived{
 
                 override fun onReceived(lv: LocusVersion, locGps: Location?, locMapCenter: Location?) {
-                    setContentView(R.layout.main_menu)
 
-                    //val dataset = arrayOf("Chat" , "Orders" , "Team" , "Settings" , "Points Management")
-                    val customAdapter = MainMenuCustomAdapter(ListData().loadAffirmaions())
-                    customAdapter.onItemClick = {
-                        println(it.id)
+                    setContent {
+                        mainMenu(currentTime, currentLocation, menuItems){ finish() }
                     }
 
-                    val recyclerView: RecyclerView = findViewById(R.id.recView)
-                    recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
-                    recyclerView.adapter = customAdapter
                 }
 
                 override fun onFailed() {
@@ -48,27 +89,35 @@ class MainActivity : AppCompatActivity() {
         }
         else if( IntentHelper.isIntentPointTools(intent))
         {
-            setContentView(R.layout.main_menu)
 
-            //val dataset = arrayOf("Chat" , "Orders" , "Team" , "Settings" , "Points Management")
-            val customAdapter = MainMenuCustomAdapter(ListData().loadAffirmaions())
-            customAdapter.onItemClick = {
-                println(it.id)
-                if(it.id == 5){
-                    val intentTeamScreen = Intent(this , TeamScreen::class.java )
-                    startActivity(intentTeamScreen)
-                }
+
+            setContent {
+                mainMenu(currentTime, currentLocation, menuItems){ finish() }
             }
+            //val dataset = arrayOf("Chat" , "Orders" , "Team" , "Settings" , "Points Management") utManager(this@MainActivity)
 
-            val recyclerView: RecyclerView = findViewById(R.id.recView)
-            recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
-            recyclerView.adapter = customAdapter
+        }
+        else if (IntentHelper.isIntentPointsTools(intent))
+        {
+            val point = IntentHelper.getPointFromIntent(this,intent);
+            runBlocking { service.sendPoint(point!!); }
+
         }
         else
         {
             LocusUtils.callStartLocusMap(this)
         }
 
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+        println("TeamScreen onStop: stopping bound is -> $bound")
+        if(bound){
+            unbindService(connection)
+            bound = false
+        }
     }
 }
 

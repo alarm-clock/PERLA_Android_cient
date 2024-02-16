@@ -5,16 +5,16 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.location.Location
+
+
 import android.os.Binder
-import android.os.Handler
+
 import android.os.IBinder
-import android.os.Looper
+
 import androidx.core.app.NotificationCompat
-import androidx.core.content.edit
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+
+import com.google.gson.Gson
+
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
@@ -24,7 +24,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import locus.api.android.ActionBasics
 import locus.api.android.ActionDisplayPoints
-import locus.api.android.ActionMapTools
 import locus.api.android.features.periodicUpdates.UpdateContainer
 import locus.api.android.objects.LocusVersion
 import locus.api.android.objects.PackPoints
@@ -45,6 +44,9 @@ class PeriodicBackroundPositionUpdater() : Service() {
     private val IdList = ArrayList<String>()
     lateinit var session: DefaultWebSocketSession
     private val binder = LocalBinder()
+
+    private var cnt = 0
+
 
     inner class LocalBinder : Binder(){
         fun getService(): PeriodicBackroundPositionUpdater = this@PeriodicBackroundPositionUpdater
@@ -196,6 +198,20 @@ class PeriodicBackroundPositionUpdater() : Service() {
 
         } else createNewPointAndSendItToLoc(text)
     }
+
+    private fun addPoint(text: String)
+    {
+
+        val point = text.substring(2,text.length)
+        val pointObj: Point = Gson().fromJson(point,Point::class.java);
+
+        var packPoints = PackPoints("user_${cnt}_location")
+        packPoints.addPoint(pointObj)
+        println("createPointForLocusAndSendIt: sending point with sendPackSilent function")
+        ActionDisplayPoints.sendPackSilent(this, packPoints , false)
+        cnt++
+    }
+
     private fun connectAndRun(host: String , port : Int)
     {
         client = HttpClient{
@@ -236,6 +252,9 @@ class PeriodicBackroundPositionUpdater() : Service() {
                         when (frame) {
                             is Frame.Text -> {
                                 var text = frame.readText()
+
+                                println("connectAndRun in websocket: recieved text from server is $text")
+
                                 if (text[0] == '2') {
                                     println("connectAndRun in websocket: received type 2 message from server -> $text")
                                     parseLocUpdate(text)
@@ -251,7 +270,13 @@ class PeriodicBackroundPositionUpdater() : Service() {
                                         this@PeriodicBackroundPositionUpdater,
                                         "user_${getIdFromTxt(text)}_location"
                                     )
-                                } else {
+
+                                } else if (text[0] == '5')
+                                {
+
+                                }
+                                else {
+
                                     println("connectAndRun in websocket: received frame wasn't text -> disconnecting from server \n connectAndRun in websocket: sending Frame.Close() to server")
                                     break
                                 }
@@ -271,7 +296,9 @@ class PeriodicBackroundPositionUpdater() : Service() {
 
             } catch (e: ConnectException)
             {
-                //println("websocket: encountered Connect exception waiting 5 sec")
+
+                println("websocket: encountered Connect exception waiting 5 sec")
+
 
                 //println("websocket: done waiting")
                 Errors.setLastConErr(ConnectionErr.INVALID_HOST)
@@ -279,9 +306,11 @@ class PeriodicBackroundPositionUpdater() : Service() {
 
             } catch (e: UnresolvedAddressException)
             {
-               //println("websocket: encountered Unresolved Address exception waiting 5 sec")
 
-               // println("websocket: done waiting")
+                println("websocket: encountered Unresolved Address exception waiting 5 sec")
+
+                // println("websocket: done waiting")
+
                 Errors.setLastConErr(ConnectionErr.INVALID_HOST)
                 Errors.latch.countDown()
 
@@ -311,6 +340,12 @@ class PeriodicBackroundPositionUpdater() : Service() {
         return START_NOT_STICKY
     }
 
+
+    suspend fun sendPoint(point: Point)
+    {
+        val data = Gson().toJson(point);
+        session.send("5|" +  data);
+    }
     override fun onDestroy() {
 
         if( thread != null) {
@@ -322,6 +357,8 @@ class PeriodicBackroundPositionUpdater() : Service() {
 
         connect =false
 
+        //when destroing from running apps screen point on the other phone was still visible fix it !!!!!!!!
+
         if(this::session.isInitialized) {
             runBlocking {
 
@@ -329,6 +366,9 @@ class PeriodicBackroundPositionUpdater() : Service() {
                 if(session.isActive)
                 {
                     try{
+
+                        session.send("loc|stop")
+
                         session.close(CloseReason(1000, "Normal closure"))
                     } catch (e: CancellationException)
                     {
