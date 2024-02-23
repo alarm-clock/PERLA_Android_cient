@@ -42,8 +42,10 @@ fun RowData( longestString: Int,name: String, icon: ImageVector)
 fun Item(menuItem: MenuItem, longestString: Int, clickable: Boolean = true)
 {
     Row(
-        modifier = if(clickable) Modifier.fillMaxWidth().padding(horizontal = 8.dp).heightIn(min = 100.dp).clickable { menuItem.onAction }
-            else Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        modifier = if(clickable) Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+            .heightIn(min = 100.dp).clickable { menuItem.onAction() }
+            else Modifier.fillMaxWidth().padding(horizontal = 8.dp).heightIn(min = 100.dp),
+
         verticalAlignment = Alignment.CenterVertically,
         ) {
             menuItem.ComposableRow(longestString)
@@ -127,7 +129,7 @@ fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocati
                 else ButtonColors(Color.Blue, Color.White, Color.Gray, Color.Gray),
                 backButtonLogic){ enableReord = !enableReord} },
             topBar = {
-                MenuTop1(currTime,currLoc,backButtonLogic)
+                MenuTop1(currTime,currLoc)
             }
         ){ padding ->
 

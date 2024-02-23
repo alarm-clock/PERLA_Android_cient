@@ -1,5 +1,7 @@
 package com.example.jmb_bms.model
 
+import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubble
@@ -9,13 +11,18 @@ import androidx.compose.material.icons.filled.Textsms
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.FileCopy
 import androidx.compose.material.icons.twotone.Map
+import androidx.core.content.ContextCompat.startActivity
+import com.example.jmb_bms.activities.TeamActivity
 import com.example.jmb_bms.view.MainMenuItem
 
-class MainMenuItems(shPref: SharedPreferences) : MenuItems {
+class MainMenuItems(shPref: SharedPreferences, context: Context) : MenuItems {
 
     private var listOfItems = mutableListOf(
         MainMenuItem("Chat", Icons.Filled.ChatBubble,1, {}),
-        MainMenuItem("Team", Icons.Filled.Group,2, {}),
+        MainMenuItem("Team", Icons.Filled.Group,2, {
+            val intent = Intent(context, TeamActivity::class.java)
+            context.startActivity(intent)
+        }),
         MainMenuItem("Settings", Icons.Filled.Settings,3, {}),
         MainMenuItem("Formatted Messages", Icons.Filled.Textsms,4, {}),
         MainMenuItem("Map Drawing", Icons.TwoTone.Map,5, {}),

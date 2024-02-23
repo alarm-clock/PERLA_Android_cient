@@ -1,6 +1,5 @@
-package com.example.jmb_bms
+package com.example.jmb_bms.activities
 
-import android.app.Application
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.Bundle
@@ -8,12 +7,12 @@ import android.os.IBinder
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
+import com.example.jmb_bms.LocusVersionHolder
+import com.example.jmb_bms.PeriodicBackroundPositionUpdater
 import com.example.jmb_bms.model.LocationRepo
 import com.example.jmb_bms.model.MainMenuItems
 import com.example.jmb_bms.view.mainMenu
 import com.example.jmb_bms.viewModel.LiveLocationFromLoc
-import com.example.jmb_bms.viewModel.LiveLocationFromLocFact
 import com.example.jmb_bms.viewModel.LiveTime
 import kotlinx.coroutines.runBlocking
 
@@ -66,7 +65,7 @@ class MainActivity : AppCompatActivity() {
             LiveLocationFromLoc.create(locationRepo)
         }
 
-        menuItems = MainMenuItems(getSharedPreferences("jmb_bms_MainMenu", MODE_PRIVATE))
+        menuItems = MainMenuItems(getSharedPreferences("jmb_bms_MainMenu", MODE_PRIVATE),this)
 
 
         if(IntentHelper.isIntentMainFunction(intent))

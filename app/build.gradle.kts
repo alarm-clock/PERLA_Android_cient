@@ -89,6 +89,11 @@ dependencies {
     //reorderable lazy column
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
+    //NASA worldwind for 2525 symbology
+    //implementation("earth.worldwind:worldwind:1.4.7")
+
+    implementation("io.github.missioncommand:mil-sym-android-renderer:0.1.55")
+
     implementation ("com.google.code.gson:gson:2.8.9")
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.ui:ui-graphics")
@@ -105,4 +110,5 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    implementation(kotlin("reflect"))
 }

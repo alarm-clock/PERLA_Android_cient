@@ -15,13 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import locus.api.android.utils.LocusUtils
 
 @Composable
 fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColor: ButtonColors,
                backButtonLogic: () -> Unit, onClicked: () -> Unit )
 {
+    val context = LocalContext.current
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -48,7 +51,7 @@ fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColo
             Button(
                 modifier = Modifier.weight(0.4f).fillMaxHeight(),
                 shape = RoundedCornerShape(0,0,0,0),
-                onClick = {}
+                onClick = {LocusUtils.callStartLocusMap(context)}
             ){
                 Icon(Icons.TwoTone.Map,"To map",Modifier.fillMaxSize())
             }
@@ -76,11 +79,11 @@ fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColo
 @Composable
 fun BottomBartes()
 {
-    Column {
+    Column() {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.width(IntrinsicSize.Min).padding(horizontal = 1.dp).height(IntrinsicSize.Max)
+            modifier = Modifier.width(IntrinsicSize.Min).padding(horizontal = 1.dp).height(IntrinsicSize.Max).heightIn(min = 130.dp)
         ){
             Button(
                 shape = RoundedCornerShape(
