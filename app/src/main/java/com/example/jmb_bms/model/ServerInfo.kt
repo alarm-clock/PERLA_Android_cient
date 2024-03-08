@@ -68,10 +68,30 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences) {
     var userNameWasEntered: Boolean = false
         private set
 
-    fun everyThingEntered() = (userNameWasEntered && portWasEntered && ipV4WasEntered)
+    fun everyThingEntered() = (userNameWasEntered && portWasEntered && ipV4WasEntered && symbolIsValid())
 
+    fun symbolIsValid() = (symbol.imageBitmap != null) //&& !symbol.invalidIcon
+
+    var symbolString = ""
+        set(value)
+        {
+            shPref.editPreferences { editor ->
+                editor.putString("ServerInfo_Symbol",value)
+                editor.apply()
+            }
+            field = value
+        }
 
     val symbol : Symbol
+
+    var menuIdsString = ""
+        set(value) {
+            shPref.editPreferences {editor ->
+                editor.putString("ServerInfo_IconMenuLists",value)
+                editor.apply()
+            }
+            field = value
+        }
 
     init{
         ipV4 = shPref.getString("ServerInfo_IP", "") ?: ""
@@ -83,12 +103,15 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences) {
         userName = shPref.getString("ServerInfo_User", "") ?: ""
         userNameWasEntered = shPref.getBoolean("ServerInfo_UserEnt", false)
 
-        val symbolCode = shPref.getString("ServerInfo_Symbol", "")
+        menuIdsString = shPref.getString("ServerInfo_IconMenuLists","") ?: ""
 
-        symbol = if (symbolCode == "" || symbolCode == null) Symbol(context)
-                     else Symbol(symbolCode, context)
+        symbolString = shPref.getString("ServerInfo_Symbol", "") ?: ""
 
-        println("$ipV4WasEntered $portWasEntered $userNameWasEntered")
+        symbol = if (symbolString == "") Symbol(context)
+                     else Symbol(symbolString, context)
+
+        symbol.createIcon(context,"250")
+
     }
     private fun SharedPreferences.editPreferences(operation: (SharedPreferences.Editor) -> Unit)
     {

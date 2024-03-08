@@ -1,0 +1,54 @@
+is
+initialMessage
+
+HELLO_THERE -> HELLO_THERE
+
+data about new user
+
+1|userName|symbolCode  ->  1|serverId good -> store information about user and send it to others / 1|0 bad -> end connection
+
+------------------------------------------------------------------------------------
+
+server sends data about users and points
+
+user
+2|userName|symbolCode|userServerId|lat-long ? null
+
+points
+TODO
+---------------------------------------------------------------------------------------
+user updates his location
+3|lat-long
+---------------------------------------------------------------------------------------
+user wants to become invisible
+3|0
+---------------------------------------------------------------------------------------
+server sends location update
+3|serverId|lat-long
+---------------------------------------------------------------------------------------
+server sends that user wants to be invisible
+3|serverId|0
+---------------------------------------------------------------------------------------
+graceful termination of connection from any side / delete user and his location / do something with points
+0|BYE
+---------------------------------------------------------------------------------------
+tagging user as team leader
+4|teamId
+---------------------------------------------------------------------------------------
+changing team icon and name
+4|teamName|symbolCode
+---------------------------------------------------------------------------------------
+putting user into team from server side
+5|teamId|leaderServerId
+---------------------------------------------------------------------------------------
+removing/adding user from/to team by team lead
+5|teamId|serverIdOfUser|remove ? add
+---------------------------------------------------------------------------------------
+location sharing turn off for whole team except leader (users stop sharing location and other users wil delete their points)
+6|teamId
+---------------------------------------------------------------------------------------
+user leaved session
+7|userId
+---------------------------------------------------------------------------------------
+other user updated his symbol or username
+8|username ? null|symbol ? null

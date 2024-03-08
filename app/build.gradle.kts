@@ -94,7 +94,11 @@ dependencies {
 
     implementation("io.github.missioncommand:mil-sym-android-renderer:0.1.55")
 
-    implementation ("com.google.code.gson:gson:2.8.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    implementation("androidx.navigation:navigation-compose:2.7.4")
+
+    implementation ("com.google.code.gson:gson:2.10")
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")

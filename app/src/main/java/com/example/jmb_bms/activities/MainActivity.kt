@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -21,11 +22,8 @@ import locus.api.android.utils.IntentHelper
 import locus.api.android.utils.LocusUtils
 import locus.api.objects.extra.Location
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity(){ //AppCompatActivity() {
 
-
-    private lateinit var service: PeriodicBackroundPositionUpdater
-    private var bound: Boolean = false
 
     private val currentTime by viewModels<LiveTime>()
 
@@ -33,23 +31,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var menuItems: MainMenuItems
 
-    /*by viewModels<LiveLocationFromLoc>{
-        LiveLocationFromLocFact(locationRepo)
-    }*/
-
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(p0: ComponentName, p1: IBinder) {
-
-            val binder = p1 as PeriodicBackroundPositionUpdater.LocalBinder
-            this@MainActivity.service = binder.getService()
-            println("onServiceConnected: setting bound to true")
-            bound = true
-        }
-
-        override fun onServiceDisconnected(p0: ComponentName?) {
-            bound =false
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,18 +39,16 @@ class MainActivity : AppCompatActivity() {
 
         if( LocusVersionHolder.getLv() == null ) return
 
-
         locationRepo = LocationRepo(applicationContext)
 
         val currentLocation by viewModels<LiveLocationFromLoc> {
             LiveLocationFromLoc.create(locationRepo)
         }
-
         menuItems = MainMenuItems(getSharedPreferences("jmb_bms_MainMenu", MODE_PRIVATE),this)
-
 
         if(IntentHelper.isIntentMainFunction(intent))
         {
+            println("|----------------------------- Over Here MOtherFucker 69 -------------------------|")
             IntentHelper.handleIntentMainFunction(this,intent, object : IntentHelper.OnIntentReceived{
 
                 override fun onReceived(lv: LocusVersion, locGps: Location?, locMapCenter: Location?) {
@@ -77,9 +56,7 @@ class MainActivity : AppCompatActivity() {
                     setContent {
                         mainMenu(currentTime, currentLocation, menuItems){ finish() }
                     }
-
                 }
-
                 override fun onFailed() {
 
                 }
@@ -88,8 +65,6 @@ class MainActivity : AppCompatActivity() {
         }
         else if( IntentHelper.isIntentPointTools(intent))
         {
-
-
             setContent {
                 mainMenu(currentTime, currentLocation, menuItems){ finish() }
             }
@@ -99,8 +74,7 @@ class MainActivity : AppCompatActivity() {
         else if (IntentHelper.isIntentPointsTools(intent))
         {
             val point = IntentHelper.getPointFromIntent(this,intent);
-            runBlocking { service.sendPoint(point!!); }
-
+            //runBlocking { service.sendPoint(point!!); }
         }
         else
         {
@@ -112,11 +86,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        println("TeamScreen onStop: stopping bound is -> $bound")
-        if(bound){
-            unbindService(connection)
-            bound = false
-        }
+   //     println("TeamScreen onStop: stopping bound is -> $bound")
+     //   if(bound){
+       //     unbindService(connection)
+         //   bound = false
+       // }
     }
 }
 

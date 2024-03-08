@@ -12,6 +12,7 @@ import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.FileCopy
 import androidx.compose.material.icons.twotone.Map
 import androidx.core.content.ContextCompat.startActivity
+import com.example.jmb_bms.activities.ClearSharedPrefDebug
 import com.example.jmb_bms.activities.TeamActivity
 import com.example.jmb_bms.view.MainMenuItem
 
@@ -27,7 +28,11 @@ class MainMenuItems(shPref: SharedPreferences, context: Context) : MenuItems {
         MainMenuItem("Formatted Messages", Icons.Filled.Textsms,4, {}),
         MainMenuItem("Map Drawing", Icons.TwoTone.Map,5, {}),
         MainMenuItem("Points Management", Icons.TwoTone.Cloud,6, {}),
-        MainMenuItem("Files",Icons.TwoTone.FileCopy,7, {} )
+        MainMenuItem("Files",Icons.TwoTone.FileCopy,7, {} ),
+        MainMenuItem("Clear shPrfs",Icons.Filled.Settings,8,{
+            val intent = Intent(context, ClearSharedPrefDebug::class.java)
+            context.startActivity(intent)
+        })
     )
     override val items : List<MainMenuItem> get() = listOfItems
 

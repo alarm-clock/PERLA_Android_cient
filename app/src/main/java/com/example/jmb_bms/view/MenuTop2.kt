@@ -1,5 +1,6 @@
 package com.example.jmb_bms.view
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -27,7 +28,10 @@ fun MenuTop2(currTime: LiveTime, currLoc: LiveLocationFromLoc, backButtonLogic: 
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()
         ){
-            Column(Modifier.width(60.dp).clickable{ backButtonLogic()}) {
+            Column(Modifier.width(60.dp).clickable{
+                Log.d("Menu Top 2 Back Button","Calling back button logic")
+                backButtonLogic()
+            }) {
                 Row(verticalAlignment = Alignment.CenterVertically){
                     Icon(Icons.AutoMirrored.Filled.ArrowBack,"Back");
                     Text("Back")

@@ -2,6 +2,7 @@ package com.example.jmb_bms.model
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import android.util.SparseArray
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -20,6 +21,7 @@ import kotlin.reflect.KProperty1
 class Symbol {
 
     private var symbolCode: String = "---------------"
+
     var cScheme: CodingScheme = CodingScheme.OTHER
         set(value) {
             somethingChanged = true
@@ -53,20 +55,22 @@ class Symbol {
         }
 
     var iconCode : IconCode2525 = GroundIcon.UNIT
-    private var imageBitmap: ImageBitmap? = null
+    var imageBitmap: ImageBitmap? = null
+        private set
+
     private var somethingChanged = false
-    var invalidIcon = true
+    var invalidIcon = false
 
 
-    constructor( symbolCode: String, context: Context)
+    constructor( symbolCode: String, context: Context, size: String = "150")
     {
         this.symbolCode = symbolCode
 
         editEnumsBasedOnString()
-
+        somethingChanged = true
         try {
-
-            if(!invalidIcon) createIcon(context)
+            Log.d("Symbol","Invalid icon: $invalidIcon")
+            if(!invalidIcon) createIcon(context, size)
 
         } catch (_: Exception)
         {
@@ -74,14 +78,14 @@ class Symbol {
         }
     }
 
-    constructor( shPref: SharedPreferences, context: Context)
+    constructor( shPref: SharedPreferences, context: Context, size: String = "150")
     {
         this.symbolCode = shPref.getString("jmb_bms_user_symbol", "---------------").toString()
 
         editEnumsBasedOnString()
         try {
 
-            if(!invalidIcon) createIcon(context)
+            if(!invalidIcon) createIcon(context,size)
 
         } catch (_: Exception)
         {
@@ -90,10 +94,9 @@ class Symbol {
     }
     constructor(context: Context)
     {
-        symbolCode = "SFGP-----------"
-        invalidIcon = false
-        editEnumsBasedOnString()
-        createIcon(context)
+        invalidIcon = true
+        //editEnumsBasedOnString()
+        //createIcon(context)
     }
 
     private fun removeMinus(string: String): String
@@ -230,6 +233,11 @@ class Symbol {
     private fun editEnumsBasedOnString()
     {
         val workinCode = removeMinus(symbolCode)
+        if(workinCode.isEmpty())
+        {
+            invalidIcon = true
+            return
+        }
 
         if( !checkAndStoreScheme(workinCode)) invalidIcon = true
         if( !checkAndStoretAffiliation(workinCode)) invalidIcon = true
@@ -305,13 +313,15 @@ class Symbol {
     }
 
     //TODO refactor this function so it looks better and most importantly it checks for errors
-    fun createIcon(context: Context) : ImageBitmap?
+    fun createIcon(context: Context, size: String) : ImageBitmap?
     {
-        if(invalidIcon && !somethingChanged) return null
+        //if(invalidIcon && !somethingChanged) return null
         if(somethingChanged)
         {
             constructCodeFromEnums()
             somethingChanged = false
+        } else {
+            return imageBitmap
         }
 
         val mir = MilStdIconRenderer.getInstance()
@@ -322,15 +332,16 @@ class Symbol {
         val cacheDir: String = context.cacheDir.getAbsoluteFile().absolutePath
         mir.init(context, cacheDir)
 
-
-        val modifiers =  SparseArray<String>();
+        val modifiers =  SparseArray<String>()
         /* modifiers.put(ModifiersUnits.C_QUANTITY,"10");
          modifiers.put(ModifiersUnits.H_ADDITIONAL_INFO_1,"H");
          modifiers.put(ModifiersUnits.H1_ADDITIONAL_INFO_2,"H1")
  */
         val attributes = SparseArray<String>()
 
-        attributes.put(MilStdAttributes.PixelSize,"150");
+
+
+        attributes.put(MilStdAttributes.PixelSize,size);
         attributes.put(MilStdAttributes.KeepUnitRatio,"true");
         attributes.put(MilStdAttributes.SymbologyStandard, RendererSettings.Symbology_2525C.toString() )
 
