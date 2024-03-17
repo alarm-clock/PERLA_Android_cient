@@ -1,7 +1,7 @@
-package com.example.jmb_bms.model
+package com.example.jmb_bms.model.icons
 
 
-enum class CodingScheme( override val character: Char): TopLevelMods2525{
+enum class CodingScheme( override val character: Char): TopLevelMods2525 {
     WAR_FIGHT('S'),
     TACTICAL_GRAPH('G'),
     METOC('W'),
@@ -10,7 +10,7 @@ enum class CodingScheme( override val character: Char): TopLevelMods2525{
     OTHER('O')
 }
 
-enum class Affiliation(override val character: Char): TopLevelMods2525{
+enum class Affiliation(override val character: Char): TopLevelMods2525 {
     PENDING('P'),
     UNKNOWN('U'),
     ASSUMED_FRIEND('A'),
@@ -23,7 +23,7 @@ enum class Affiliation(override val character: Char): TopLevelMods2525{
     OTHER('O')
 }
 
-enum class Cathegory(override val character: Char): TopLevelMods2525{
+enum class Cathegory(override val character: Char): TopLevelMods2525 {
     TASK('T'),
     C2('G'),
     MOBILITY('M'),
@@ -32,7 +32,7 @@ enum class Cathegory(override val character: Char): TopLevelMods2525{
     OTHER('O')
 }
 
-enum class BattleDimension(override val character: Char): TopLevelMods2525{
+enum class BattleDimension(override val character: Char): TopLevelMods2525 {
     SPACE('P'),
     AIR('A'),
     GROUND('G'),
@@ -43,7 +43,7 @@ enum class BattleDimension(override val character: Char): TopLevelMods2525{
     NONE('-')
 }
 
-enum class Status(override val character: Char): TopLevelMods2525{
+enum class Status(override val character: Char): TopLevelMods2525 {
     ANTICIPATED('A'),
     PRESENT('P')
 }
@@ -819,7 +819,7 @@ enum class SeaSurfaceIcon(override var iconCode: String): IconCode2525
     OWN_TRACK("O")
 }
 
-enum class SubSeaSurfaceIcon(override var iconCode: String):IconCode2525
+enum class SubSeaSurfaceIcon(override var iconCode: String): IconCode2525
 {
     SUBSURFACE_TRACK(""),
     SUBMARINE("S"),
@@ -1371,5 +1371,5 @@ enum class TacticalGraphicsIconCode(override var iconCode: String): IconCode2525
     ELECTROMAGNETIC("FE"),
     ELECTROOPTICAL("FO")
 }
-//if you are wondering if this was written by me answer is no. I wrote program which scraped html file I found on the
+//if you are wondering if this was written by me answer is no. I wrote program which scraped html file I found on
 //net, and it rewrote it into this enum class

@@ -8,15 +8,15 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.core.content.edit
 import androidx.lifecycle.*
 import com.example.jmb_bms.connectionService.ConnectionService
 import com.example.jmb_bms.connectionService.ConnectionState
-import com.example.jmb_bms.connectionService.ServiceStateCallback
+import com.example.jmb_bms.connectionService.in_app_communication.ServiceStateCallback
 import com.example.jmb_bms.model.*
+import com.example.jmb_bms.model.icons.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -67,13 +67,13 @@ class ServerInfoVM(context: Context,) : ViewModel(), ServiceStateCallback {
 
     private val menuListsHelper = MenuListsHelper()
 
-    val level1 = listOf(OpenableMenuItem("P","Space",BattleDimension.SPACE,null),
-        OpenableMenuItem("A","AIR",BattleDimension.AIR,null),
-        OpenableMenuItem("G","Ground",BattleDimension.GROUND,null),
-        OpenableMenuItem("S","Sea Surface",BattleDimension.SEA_SURFACE,null),
-        OpenableMenuItem("U","Sea Subsurface",BattleDimension.SEA_SUBSURFACE,null),
+    val level1 = listOf(OpenableMenuItem("P","Space", BattleDimension.SPACE,null),
+        OpenableMenuItem("A","AIR", BattleDimension.AIR,null),
+        OpenableMenuItem("G","Ground", BattleDimension.GROUND,null),
+        OpenableMenuItem("S","Sea Surface", BattleDimension.SEA_SURFACE,null),
+        OpenableMenuItem("U","Sea Subsurface", BattleDimension.SEA_SUBSURFACE,null),
         OpenableMenuItem("F", "SOF", BattleDimension.SOF,null),
-        OpenableMenuItem("X","Other",BattleDimension.OTHER,null)
+        OpenableMenuItem("X","Other", BattleDimension.OTHER,null)
         )
 
     val listStack = mutableListOf(level1)
@@ -310,7 +310,7 @@ class ServerInfoVM(context: Context,) : ViewModel(), ServiceStateCallback {
                 putBoolean("Server_Connected",true)
                 apply()
             }
-            transitionManager?.changingToServerVM()
+            transitionManager?.changingToServerVM(model.ipV4,model.port)
 
         } else if( newState == ConnectionState.ERROR)
         {

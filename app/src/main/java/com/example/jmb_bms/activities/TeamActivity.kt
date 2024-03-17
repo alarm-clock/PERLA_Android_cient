@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,7 @@ import com.example.jmb_bms.view.ServerService
 import com.example.jmb_bms.view.permissionMissing
 import com.example.jmb_bms.viewModel.*
 
-class TeamActivity : AppCompatActivity() {
+class TeamActivity : ComponentActivity() {
 
     private val currentTime by viewModels<LiveTime>()
 

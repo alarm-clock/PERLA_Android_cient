@@ -5,5 +5,6 @@ enum class ConnectionState() {
     NEGOTIATING,
     CONNECTED,
     RECONNECTING,
-    ERROR
+    ERROR,
+    NONE
 }

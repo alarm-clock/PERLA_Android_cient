@@ -24,7 +24,7 @@ class PeriodicPositionUpdater(private var delay: Long,
             Log.d("Periodic Pos Updater","Starting updating job...")
             LocationRepo(ctx,delay,false).getLocUpdates().collect{ update ->
                 Log.d("Periodic Pos Updater","Sending location update $update")
-                session.send(locationUpdate(update))
+                session.send(ClientMessage.locationUpdate(update))
             }
         }
     }

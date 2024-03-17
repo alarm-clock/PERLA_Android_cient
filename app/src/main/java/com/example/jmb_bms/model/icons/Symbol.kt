@@ -1,4 +1,4 @@
-package com.example.jmb_bms.model
+package com.example.jmb_bms.model.icons
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -7,15 +7,9 @@ import android.util.SparseArray
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import armyc2.c2sd.renderer.MilStdIconRenderer
-import armyc2.c2sd.renderer.ModifierRenderer
 import armyc2.c2sd.renderer.SinglePointRenderer
 import armyc2.c2sd.renderer.utilities.MilStdAttributes
-import armyc2.c2sd.renderer.utilities.ModifiersTG
-import armyc2.c2sd.renderer.utilities.ModifiersUnits
 import armyc2.c2sd.renderer.utilities.RendererSettings
-import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KProperty1
 
 
 class Symbol {
@@ -272,7 +266,7 @@ class Symbol {
         return true
     }
 
-    fun editIconCode( code: IconCode2525 ) : Boolean
+    fun editIconCode( code: IconCode2525) : Boolean
     {
         if( !checkIfDimensionIsCorrectWithIcon(code) ) return false
 

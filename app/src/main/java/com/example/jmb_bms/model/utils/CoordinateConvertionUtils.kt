@@ -1,6 +1,5 @@
-package com.example.jmb_bms.model
+package com.example.jmb_bms.model.utils
 
-import com.google.android.gms.maps.model.LatLng
 import locus.api.objects.extra.Location
 import mil.nga.mgrs.MGRS
 

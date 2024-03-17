@@ -1,4 +1,4 @@
-package com.example.jmb_bms.model
+package com.example.jmb_bms.model.utils
 
 const val secConst = 1000
 const val minConst = 60000

@@ -1,7 +1,9 @@
 package com.example.jmb_bms.model
 
+import com.example.jmb_bms.model.icons.AirSymbols
+import com.example.jmb_bms.model.icons.GroundIcon
+import com.example.jmb_bms.model.icons.SpaceSymbols
 import com.example.jmb_bms.viewModel.ServerInfoVM
-import kotlin.reflect.KClass
 
 class MenuListsHelper {
 
@@ -28,11 +30,12 @@ class MenuListsHelper {
     }
 
     private val airFirstLevel = listOf(
-        OpenableMenuItem("-","Air Track",null,AirSymbols.AIR_TRACK){vm ,context-> vm.finishCreatingSymbol(AirSymbols.AIR_TRACK,context)},
+        OpenableMenuItem("-","Air Track",null, AirSymbols.AIR_TRACK){ vm, context-> vm.finishCreatingSymbol(AirSymbols.AIR_TRACK,context)},
         OpenableMenuItem("AMF","Military - Fixed Wing",null,null,null),
         OpenableMenuItem("AMD", "Military - Drone",null,null,null),
         OpenableMenuItem("AMR", "Military - Rotary Wing", null,null,null),
-        OpenableMenuItem("AW","Military - Weapon", null,AirSymbols.WEAPON){vm ,context -> vm.finishCreatingSymbol(AirSymbols.WEAPON,context)},
+        OpenableMenuItem("AW","Military - Weapon", null, AirSymbols.WEAPON){ vm, context -> vm.finishCreatingSymbol(
+            AirSymbols.WEAPON,context)},
         OpenableMenuItem("AWM", "Military - Missile, Bomb..." , null,null,null),
         OpenableMenuItem("AC","Civilian",null,null,null)
         )
@@ -45,57 +48,69 @@ class MenuListsHelper {
     }.map {
         OpenableMenuItem(it.iconCode,it.toString(),null,it){vm ,context -> vm.finishCreatingSymbol(it,context)}
     }
-    private fun airDrone() = createBottomAirList(AirSymbols.DRONE__UAV.ordinal,AirSymbols.DRONE_MEDEVAC.ordinal)
-    private fun airRotaryWing() = createBottomAirList(AirSymbols.ROTARY_WING.ordinal,AirSymbols.RW_ECM.ordinal)
-    private fun airMissiles() = createBottomAirList(AirSymbols.MISSILE_IN_FLIGHT.ordinal,AirSymbols.DECOY.ordinal)
-    private fun airCiv() = createBottomAirList(AirSymbols.CIVIL_AIRCRAFT.ordinal,AirSymbols.C_LIGHTER_THEN_AIR.ordinal)
+    private fun airDrone() = createBottomAirList(AirSymbols.DRONE__UAV.ordinal, AirSymbols.DRONE_MEDEVAC.ordinal)
+    private fun airRotaryWing() = createBottomAirList(AirSymbols.ROTARY_WING.ordinal, AirSymbols.RW_ECM.ordinal)
+    private fun airMissiles() = createBottomAirList(AirSymbols.MISSILE_IN_FLIGHT.ordinal, AirSymbols.DECOY.ordinal)
+    private fun airCiv() = createBottomAirList(AirSymbols.CIVIL_AIRCRAFT.ordinal, AirSymbols.C_LIGHTER_THEN_AIR.ordinal)
 
     private fun groundLvl1() = listOf(
-        OpenableMenuItem("-","Ground Track",null,GroundIcon.GROUND_TRACK){vm ,context -> vm.finishCreatingSymbol(GroundIcon.GROUND_TRACK,context)},
+        OpenableMenuItem("-","Ground Track",null, GroundIcon.GROUND_TRACK){ vm, context -> vm.finishCreatingSymbol(
+            GroundIcon.GROUND_TRACK,context)},
         OpenableMenuItem("GLU", "Ground Unit", null,null),
         OpenableMenuItem("GLE","Ground Equipment", null,null),
         OpenableMenuItem("GLI", "Ground Installations", null,null),
     )
 
     private inline fun groundUnitLvl2() = listOf(
-        OpenableMenuItem("U","Unit", null, GroundIcon.UNIT){vm ,context-> vm.finishCreatingSymbol(GroundIcon.UNIT,context)},
-        OpenableMenuItem("UC","Combat", null, GroundIcon.COMBAT){vm ,context-> vm.finishCreatingSymbol(GroundIcon.COMBAT,context)},
-        OpenableMenuItem("UAD", "Air Defence", null,GroundIcon.AIR_DEFENSE){vm ,context-> vm.finishCreatingSymbol(GroundIcon.AIR_DEFENSE,context)}, //this might actually work
+        OpenableMenuItem("U","Unit", null, GroundIcon.UNIT){ vm, context-> vm.finishCreatingSymbol(GroundIcon.UNIT,context)},
+        OpenableMenuItem("UC","Combat", null, GroundIcon.COMBAT){ vm, context-> vm.finishCreatingSymbol(GroundIcon.COMBAT,context)},
+        OpenableMenuItem("UAD", "Air Defence", null, GroundIcon.AIR_DEFENSE){ vm, context-> vm.finishCreatingSymbol(
+            GroundIcon.AIR_DEFENSE,context)}, //this might actually work
         OpenableMenuItem("UA", "Armor", null,null),
         OpenableMenuItem("UAA", "Anti Armor",null,null),
-        OpenableMenuItem("UAV","Aviation",null,GroundIcon.AVIATION){vm ,context-> vm.finishCreatingSymbol(GroundIcon.AVIATION,context)},
+        OpenableMenuItem("UAV","Aviation",null, GroundIcon.AVIATION){ vm, context-> vm.finishCreatingSymbol(GroundIcon.AVIATION,context)},
         OpenableMenuItem("UIE", "Infantry and Engineer", null,null),
-        OpenableMenuItem("UFA", "Field artillery",null,GroundIcon.FIELD_ARTILLERY){vm ,context-> vm.finishCreatingSymbol(GroundIcon.FIELD_ARTILLERY,context)},
-        OpenableMenuItem("UCS", "Combat support",null,GroundIcon.COMBAT_SUPPORT){vm ,context-> vm.finishCreatingSymbol(GroundIcon.COMBAT_SUPPORT,context)},
+        OpenableMenuItem("UFA", "Field artillery",null, GroundIcon.FIELD_ARTILLERY){ vm, context-> vm.finishCreatingSymbol(
+            GroundIcon.FIELD_ARTILLERY,context)},
+        OpenableMenuItem("UCS", "Combat support",null, GroundIcon.COMBAT_SUPPORT){ vm, context-> vm.finishCreatingSymbol(
+            GroundIcon.COMBAT_SUPPORT,context)},
         OpenableMenuItem("UO","Other",null,null)
     )
 
     private inline fun groundUnitCSLvl3() = listOf(
-        OpenableMenuItem("SN","NBC", null, GroundIcon.NBC){vm ,context-> vm.finishCreatingSymbol(GroundIcon.NBC,context)},
-        OpenableMenuItem("SI", "Military Intelligence",null,GroundIcon.MILITARY_INTELLIGENCE){vm ,context -> vm.finishCreatingSymbol(GroundIcon.MILITARY_INTELLIGENCE,context)},
-        OpenableMenuItem("SS", "Signal Unit",null,GroundIcon.SIGNAL_UNIT){vm ,context-> vm.finishCreatingSymbol(GroundIcon.SIGNAL_UNIT,context)},
-        OpenableMenuItem("SL","Law Enforcement",null,GroundIcon.LAW_ENFORCEMENT_UNIT){vm ,context -> vm.finishCreatingSymbol(GroundIcon.LAW_ENFORCEMENT_UNIT,context)},
-        OpenableMenuItem("SCSS", "Command Service Support",null,GroundIcon.COMBAT_SERVICE_SUPPORT){vm ,context -> vm.finishCreatingSymbol(GroundIcon.COMBAT_SERVICE_SUPPORT,context)},
+        OpenableMenuItem("SN","NBC", null, GroundIcon.NBC){ vm, context-> vm.finishCreatingSymbol(GroundIcon.NBC,context)},
+        OpenableMenuItem("SI", "Military Intelligence",null, GroundIcon.MILITARY_INTELLIGENCE){ vm, context -> vm.finishCreatingSymbol(
+            GroundIcon.MILITARY_INTELLIGENCE,context)},
+        OpenableMenuItem("SS", "Signal Unit",null, GroundIcon.SIGNAL_UNIT){ vm, context-> vm.finishCreatingSymbol(
+            GroundIcon.SIGNAL_UNIT,context)},
+        OpenableMenuItem("SL","Law Enforcement",null, GroundIcon.LAW_ENFORCEMENT_UNIT){ vm, context -> vm.finishCreatingSymbol(
+            GroundIcon.LAW_ENFORCEMENT_UNIT,context)},
+        OpenableMenuItem("SCSS", "Command Service Support",null, GroundIcon.COMBAT_SERVICE_SUPPORT){ vm, context -> vm.finishCreatingSymbol(
+            GroundIcon.COMBAT_SERVICE_SUPPORT,context)},
         OpenableMenuItem("SO", "Other", null,null)
     )
 
     private inline fun groundUnitNBCLvl4() = createBottomGroundList(GroundIcon.NBC.ordinal, GroundIcon.DECONTAMINATION.ordinal)
 
-    private inline fun groundUnitMilIntLvl4() = createBottomGroundList(GroundIcon.MILITARY_INTELLIGENCE.ordinal,GroundIcon.JOINT_INTELLIGENCE_CENTER.ordinal)
+    private inline fun groundUnitMilIntLvl4() = createBottomGroundList(
+        GroundIcon.MILITARY_INTELLIGENCE.ordinal,
+        GroundIcon.JOINT_INTELLIGENCE_CENTER.ordinal)
 
     private inline fun groundUnitLELvl4() = createBottomGroundList(GroundIcon.LAW_ENFORCEMENT_UNIT.ordinal, GroundIcon.CENTRAL_INTELLIGENCE_DIVISION_CID.ordinal)
 
-    private inline fun groundUnitSSLvl4() = createBottomGroundList(GroundIcon.SIGNAL_UNIT.ordinal,GroundIcon.ELECTRONIC_RANGING.ordinal)
+    private inline fun groundUnitSSLvl4() = createBottomGroundList(GroundIcon.SIGNAL_UNIT.ordinal, GroundIcon.ELECTRONIC_RANGING.ordinal)
 
-    private inline fun groundUnitOLvl4() = createBottomGroundList(GroundIcon.INFORMATION_WARFARE_UNIT.ordinal,GroundIcon.EXPLOSIVE_ORDNANCE_DISPOSAL.ordinal)
+    private inline fun groundUnitOLvl4() = createBottomGroundList(
+        GroundIcon.INFORMATION_WARFARE_UNIT.ordinal,
+        GroundIcon.EXPLOSIVE_ORDNANCE_DISPOSAL.ordinal)
     private inline fun groundUnitCSSLvl4() = createBottomGroundList(GroundIcon.COMBAT_SERVICE_SUPPORT.ordinal, GroundIcon.ELECTROOPTICAL_CORPS.ordinal)
-    private inline fun groundUnitADLvl3() = createBottomGroundList(GroundIcon.AIR_DEFENSE.ordinal,GroundIcon.THEATER_MISSILE_DEFENSE_UNIT.ordinal)
-    private inline fun groundUnitArmorLvl3() = createBottomGroundList(GroundIcon.ARMOR.ordinal,GroundIcon.ARMOR_WHEELED_RECOVERY.ordinal)
-    private inline fun groundUnitAArmLvl3() = createBottomGroundList(GroundIcon.ANTI_ARMOR.ordinal,GroundIcon.ANTI_ARMOR_MOTORIZED_AIR_ASSAULT.ordinal)
-    private inline fun groundUnitAVLvl3() = createBottomGroundList(GroundIcon.AVIATION.ordinal,GroundIcon.UNMANNED_AERIAL_VEHICLE_ROTARY_WING.ordinal)
-    private inline fun groundUnitIELvl3() = createBottomGroundList(GroundIcon.INFANTRY.ordinal,GroundIcon.ENGINEER_NAVAL_CONSTRUCTION.ordinal)
-    private inline fun groundUnitFALvl3() = createBottomGroundList(GroundIcon.FIELD_ARTILLERY.ordinal,GroundIcon.MOUNTAIN_METEOROLOGICAL.ordinal)
-    private inline  fun groundUnitOLvl3() = createBottomGroundList(GroundIcon.RECONNAISSANCE.ordinal,GroundIcon.INTERNAL_SEC_FORCES_AVIATION.ordinal)
+    private inline fun groundUnitADLvl3() = createBottomGroundList(GroundIcon.AIR_DEFENSE.ordinal, GroundIcon.THEATER_MISSILE_DEFENSE_UNIT.ordinal)
+    private inline fun groundUnitArmorLvl3() = createBottomGroundList(GroundIcon.ARMOR.ordinal, GroundIcon.ARMOR_WHEELED_RECOVERY.ordinal)
+    private inline fun groundUnitAArmLvl3() = createBottomGroundList(GroundIcon.ANTI_ARMOR.ordinal, GroundIcon.ANTI_ARMOR_MOTORIZED_AIR_ASSAULT.ordinal)
+    private inline fun groundUnitAVLvl3() = createBottomGroundList(GroundIcon.AVIATION.ordinal, GroundIcon.UNMANNED_AERIAL_VEHICLE_ROTARY_WING.ordinal)
+    private inline fun groundUnitIELvl3() = createBottomGroundList(GroundIcon.INFANTRY.ordinal, GroundIcon.ENGINEER_NAVAL_CONSTRUCTION.ordinal)
+    private inline fun groundUnitFALvl3() = createBottomGroundList(GroundIcon.FIELD_ARTILLERY.ordinal, GroundIcon.MOUNTAIN_METEOROLOGICAL.ordinal)
+    private inline  fun groundUnitOLvl3() = createBottomGroundList(GroundIcon.RECONNAISSANCE.ordinal, GroundIcon.INTERNAL_SEC_FORCES_AVIATION.ordinal)
 
 
 

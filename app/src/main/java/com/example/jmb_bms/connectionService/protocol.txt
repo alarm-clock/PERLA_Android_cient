@@ -29,26 +29,48 @@ server sends location update
 server sends that user wants to be invisible
 3|serverId|0
 ---------------------------------------------------------------------------------------
-graceful termination of connection from any side / delete user and his location / do something with points
-0|BYE
----------------------------------------------------------------------------------------
-tagging user as team leader
-4|teamId
----------------------------------------------------------------------------------------
-changing team icon and name
-4|teamName|symbolCode
----------------------------------------------------------------------------------------
-putting user into team from server side
-5|teamId|leaderServerId
----------------------------------------------------------------------------------------
-removing/adding user from/to team by team lead
-5|teamId|serverIdOfUser|remove ? add
----------------------------------------------------------------------------------------
-location sharing turn off for whole team except leader (users stop sharing location and other users wil delete their points)
-6|teamId
----------------------------------------------------------------------------------------
 user leaved session
 7|userId
 ---------------------------------------------------------------------------------------
 other user updated his symbol or username
 8|username ? null|symbol ? null
+---------------------------------------------------------------------------------------
+graceful termination of connection from any side / delete user and his location / do something with points
+0|BYE
+
+
+---------------------------------------------------------------------------------------
+server sending data about created team
+20|teamId|teamName|teamIcon|teamLocation|teamLeader
+---------------------------------------------------------------------------------------
+team leader creating team withing his team  //essentially team leader will be put as team lead in new team, new team will be part of higher team
+21|teamName|teamIcon|topTeamID              //server will respond with opCode 20 on success or 21 empty message on fail
+---------------------------------------------------------------------------------------
+team leader deleting his team
+22|teamId
+---------------------------------------------------------------------------------------
+team deletion message from server      //this message will be sent even if admin on server side deletes team
+22|teamId ?                            //empty message to team leader indicates error
+---------------------------------------------------------------------------------------
+adding or removing user from team      //universal for client and server
+23|true ? false|teamId|userId ? teamId
+---------------------------------------------------------------------------------------
+changing team leader                   //universal for client and server
+24|teamId|newLeadersUserId
+---------------------------------------------------------------------------------------
+updating team
+25|teamId|newName|newIcon
+---------------------------------------------------------------------------------------
+turning off/on location share for all users except team lead
+26|teamId|true ? false
+---------------------------------------------------------------------------------------
+team lead requesting turn on / off location for team member    //this is sent by team leader
+27|teamId|userId|true ? false
+---------------------------------------------------------------------------------------
+server requesting turning on / off location share for user     //this is only sent by server as response to 27
+28|userId ? teamId
+---------------------------------------------------------------------------------------
+team sharing location
+29|teamId|  lat|long ? null
+
+TODO location share within specific group of people like team and so on

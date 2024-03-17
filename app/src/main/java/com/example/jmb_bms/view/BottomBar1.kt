@@ -49,27 +49,30 @@ fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColo
                 }
             }
             Button(
-                modifier = Modifier.weight(0.4f).fillMaxHeight(),
+                modifier = Modifier.weight(if(rButtonText != null || rButtonIcon != null ) 0.4f else 1.0f).fillMaxHeight(),
                 shape = RoundedCornerShape(0,0,0,0),
                 onClick = {LocusUtils.callStartLocusMap(context)}
             ){
                 Icon(Icons.TwoTone.Map,"To map",Modifier.fillMaxSize())
             }
-            Button(
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                shape = RoundedCornerShape(
-                    topStart = 0.dp,
-                    bottomStart = 0.dp,
-                    topEnd = 16.dp,
-                    bottomEnd = 0.dp
-                ),
-                colors = rButtonStateColor,
-                onClick = onClicked
-            ){
-                if(rButtonText != null)
-                    Text(rButtonText)
-                else if( rButtonIcon != null)
-                    Icon(rButtonIcon,"menu")
+            if(rButtonText != null || rButtonIcon != null )
+            {
+                Button(
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        bottomStart = 0.dp,
+                        topEnd = 16.dp,
+                        bottomEnd = 0.dp
+                    ),
+                    colors = rButtonStateColor,
+                    onClick = onClicked
+                ){
+                    if(rButtonText != null)
+                        Text(rButtonText)
+                    else if( rButtonIcon != null)
+                        Icon(rButtonIcon,"menu")
+                }
             }
         }
     }
