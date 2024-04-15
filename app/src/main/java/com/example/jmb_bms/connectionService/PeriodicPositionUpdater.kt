@@ -8,7 +8,7 @@ import kotlinx.coroutines.*
 
 class PeriodicPositionUpdater(private var delay: Long,
                               val ctx: Context, var session: DefaultWebSocketSession,
-                              startAtInit: Boolean = false) {
+                              startAtInit: Boolean = false,val teamId: String? = null,val userLoc: Boolean = true) {
 
     private var job : Job = Job()
 
@@ -19,12 +19,14 @@ class PeriodicPositionUpdater(private var delay: Long,
     private fun launchJob()
     {
         //TODO maybe check if session is still active
+        if(!userLoc && teamId == null) return
 
         scope.launch {
-            Log.d("Periodic Pos Updater","Starting updating job...")
+
             LocationRepo(ctx,delay,false).getLocUpdates().collect{ update ->
                 Log.d("Periodic Pos Updater","Sending location update $update")
-                session.send(ClientMessage.locationUpdate(update))
+                if(userLoc)  session.send(ClientMessage.locationUpdate(update))
+                else session.send(ClientMessage.teamLocationUpdate(teamId!!,update))
             }
         }
     }

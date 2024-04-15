@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.jmb_bms.ui.theme.LocalTheme
 import com.example.jmb_bms.viewModel.LiveLocationFromLoc
 import com.example.jmb_bms.viewModel.LiveTime
 
@@ -31,17 +32,18 @@ fun TimeAndLoc(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc, fontSizeUp:
 {
     val currTime by currTimeVM.currentTime.observeAsState("")
     val currLoc by currLocVM.currLocation.observeAsState("")
+    val scheme = LocalTheme.current
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.Center
     ) {
-        Text(currTime, fontSize = fontSizeUp)
+        Text(currTime, fontSize = fontSizeUp, color = scheme.onPrimary)
     }
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.Center
     ) {
-        Text(currLoc ?: "Loading...", fontSize = fontSizeDown)
+        Text(currLoc ?: "Loading...", fontSize = fontSizeDown, color = scheme.onPrimary)
     }
 
 }
@@ -50,9 +52,8 @@ fun TimeAndLoc(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc, fontSizeUp:
 fun MenuTop1(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc)
 {
 
-
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    val scheme = LocalTheme.current
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(scheme.primary)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.Center,
@@ -62,7 +63,7 @@ fun MenuTop1(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc)
                 TimeAndLoc(currTimeVM,currLocVM,45.sp,30.sp)
             }
         }
-        Divider(Color.Black,2.dp)
+        Divider(scheme.onPrimary,2.dp)
     }
 }
 

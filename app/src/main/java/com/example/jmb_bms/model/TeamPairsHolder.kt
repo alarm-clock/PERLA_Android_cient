@@ -11,8 +11,12 @@ class TeamPairsHolder(val data: MutableStateFlow<MutableSet<TeamLiveDataHolder>>
 
     fun updateSet(data: TeamLiveDataHolder, add: Boolean)
     {
-        if(add) this.data.value.add(data)
-        else this.data.value.remove(data)
+        val tmp = this.data.value.toHashSet()
+
+        if(add) tmp.add(data)
+        else tmp.removeIf{ it.getTeamId() == data.getTeamId()}
+
+        this.data.value = tmp
     }
 
     fun setNewSet(newSet: MutableSet<TeamLiveDataHolder>)

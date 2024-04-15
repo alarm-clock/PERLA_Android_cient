@@ -13,9 +13,6 @@ server sends data about users and points
 
 user
 2|userName|symbolCode|userServerId|lat-long ? null
-
-points
-TODO
 ---------------------------------------------------------------------------------------
 user updates his location
 3|lat-long
@@ -74,3 +71,63 @@ team sharing location
 29|teamId|  lat|long ? null
 
 TODO location share within specific group of people like team and so on
+
+--------------------------------------------------------------------------------------
+point creation                                              //used by both server and user
+40|name|descr ?|[filenames]|symbol|menuString|owner ? | serverId {when sent from server}
+--------------------------------------------------------------------------------------
+point creation result                                       //sent by server to point creator
+41|success| reason ?  [serverId|localId]
+--------------------------------------------------------------------------------------
+point deletion
+42|serverId
+--------------------------------------------------------------------------------------
+point update
+43|values ?
+--------------------------------------------------------------------------------------
+sync                        //used by both server and client
+44|ids
+
+transactions
+--------------------------------------------------------------------------------------
+acknowledge failed transaction
+49|transactionId
+
+
+files
+--------------------------------------------------------------------------------------
+tell client to download file
+50|filename
+
+
+
+
+
+--------------------------------------------------------------------------------------
+create new chat room                        //client to server
+60|name|[memberIds] ?
+--------------------------------------------------------------------------------------
+chat room creation/update                   //server to client
+60|_id|name|ownerId|[memberIds]
+--------------------------------------------------------------------------------------
+delete chat room
+61|_id
+--------------------------------------------------------------------------------------
+manage users                               // on addition all users receive 60 on deletion remaining members receive 60 others 61
+62|_id|add|[userIds]
+--------------------------------------------------------------------------------------
+change owner
+63|_id|newOwnerId
+--------------------------------------------------------------------------------------
+send message                              //client to server
+64|_id|transactionId ?|text|[files]|[points]
+--------------------------------------------------------------------------------------
+send message                              //server to client
+64|messageId|_id|text|[files]|[points]
+--------------------------------------------------------------------------------------
+fetch 30 older messages                   //client to server
+65|_id|cap ? -1                           //-1 is newest message
+--------------------------------------------------------------------------------------
+send 30 older messages                    //server to client
+65|[60s without opcode]
+--------------------------------------------------------------------------------------

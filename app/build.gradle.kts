@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -50,6 +51,7 @@ dependencies {
 
     // Android Studio Preview support
     implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("io.ktor:ktor-client-android:2.3.8")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     // UI Tests
@@ -89,14 +91,23 @@ dependencies {
     //reorderable lazy column
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
-    //NASA worldwind for 2525 symbology
-    //implementation("earth.worldwind:worldwind:1.4.7")
-
     implementation("io.github.missioncommand:mil-sym-android-renderer:0.1.55")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     implementation("androidx.navigation:navigation-compose:2.7.4")
+
+    //implementation("org.jetbrains.kotlin:kotlinx-coroutines-android:1.8.0")
+
+    //loading images from uri and url
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+    //playing videos
+    implementation("androidx.media3:media3-exoplayer:1.3.0")
+    implementation("androidx.media3:media3-ui:1.3.0")
+
 
     implementation ("com.google.code.gson:gson:2.10")
     implementation("androidx.compose.material:material")

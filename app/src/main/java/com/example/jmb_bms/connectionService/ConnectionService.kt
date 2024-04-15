@@ -14,19 +14,19 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.edit
-import com.example.jmb_bms.connectionService.in_app_communication.ComplexServiceStateCallBacks
-import com.example.jmb_bms.connectionService.in_app_communication.InnerCommunicationCentral
-import com.example.jmb_bms.connectionService.in_app_communication.ServiceStateCallback
+import com.example.jmb_bms.connectionService.in_app_communication.*
+import com.example.jmb_bms.connectionService.models.ChatRelatedModel
 import com.example.jmb_bms.connectionService.models.ConnectionDataAndState
+import com.example.jmb_bms.connectionService.models.PointRelatedDataModel
 import com.example.jmb_bms.connectionService.models.TeamRelatedDataModel
+import com.example.jmb_bms.model.ChatMessage
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
 import io.ktor.websocket.*
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.concurrent.thread
 
 class ConnectionService : Service() {
@@ -48,15 +48,41 @@ class ConnectionService : Service() {
     {
         comCentral.registerComplexCallBack(callBacks)
         callBacks.setUsersAnTeams(serviceModel.listOfUsers,teamModel.teams)
-        //callBacks.updatedUserListCallBack(serviceModel.listOfUsers)
         callBacks.updateSharingLocationState(serviceModel.sharingLocation)
-        //callBacks.setTeamsSet(teamModel.teams)
         callBacks.clientProfile(serviceModel.profile)
-        //TODO add team related calls and client profile call
+    }
+
+    fun setLiveUsersCallBack(callback: LiveUsersCallback)
+    {
+        comCentral.registerLiveUsersCallback(callback)
+        callback.updatedUserListCallBack(serviceModel.listOfUsers)
+    }
+    fun unsetLiveUsersCallBack(){
+        comCentral.unregisterLiveUsersCallback()
     }
     fun unSetComplexDataCallBack()
     {
         comCentral.unRegisterComplexCallBack()
+    }
+    fun setChatRoomsCallBack(callBacks: ChatRoomsCallBacks)
+    {
+        comCentral.registerChatRoomsCallback(callBacks)
+        chatModel.fetchNewestMessages()
+    }
+
+    fun unsetChatRoomsCallBack()
+    {
+        comCentral.unregisterChatRoomsCallback()
+    }
+
+    fun setPointCallBacks(callbacks: PointRelatedCallBacks)
+    {
+        comCentral.registerPointRelatedCallBacks(callbacks)
+    }
+
+    fun unsetPointCallBacks()
+    {
+        comCentral.unregisterPointRelatedCallBacks()
     }
 
 
@@ -76,6 +102,8 @@ class ConnectionService : Service() {
     private var unknownFrameCounter = 0
     lateinit var serviceModel : ConnectionDataAndState
     lateinit var teamModel : TeamRelatedDataModel
+    lateinit var pointModel: PointRelatedDataModel
+    lateinit var chatModel: ChatRelatedModel
     private var connectionThread: Thread? = null
 
     private var doesNotHavePermission = false
@@ -87,6 +115,9 @@ class ConnectionService : Service() {
         super.onCreate()
         serviceModel = ConnectionDataAndState(this,comCentral)
         teamModel = TeamRelatedDataModel(comCentral,serviceModel,this)
+        pointModel = PointRelatedDataModel(this,comCentral)
+        chatModel = ChatRelatedModel(this,comCentral)
+        serviceModel.teamModel = teamModel
 
         val channel = NotificationChannel("jmb_bms_1","jmb_bms_notification channel",NotificationManager.IMPORTANCE_DEFAULT)
         val notManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -116,6 +147,8 @@ class ConnectionService : Service() {
         val netCallback = object : ConnectivityManager.NetworkCallback() {
 
             private var firstCall = true
+
+            private var onAvailableWasCalled = false
             private var lostWasCalled = false
 
             override fun onAvailable(network: Network) {
@@ -125,14 +158,15 @@ class ConnectionService : Service() {
                     firstCall = false
                     return
                 }
+                if(onAvailableWasCalled) return
                 Log.d("Connection Service","Network is available again so restarting connection...")
                 this@ConnectionService.restartSessionWithServer()
                 lostWasCalled = false
+                onAvailableWasCalled = true
             }
 
             override fun onUnavailable() {
                 super.onUnavailable()
-                Log.d("JOJO","Over here motherfucker")
             }
 
             override fun onLost(network: Network) {
@@ -140,9 +174,13 @@ class ConnectionService : Service() {
 
                 if(!lostWasCalled) {
                     lostWasCalled = true
+                    onAvailableWasCalled = false
                     Log.d("Connection Service", "Lost internet connection. Stopping websocket!")
                     session.cancel()
                     sharingLocationJobHandler?.stopSharingLoc()
+                    teamModel.teamLocationUpdateHandlers.forEach {
+                        it.stopSharingLoc()
+                    }
                 }
             }
         }
@@ -217,7 +255,7 @@ class ConnectionService : Service() {
         Log.d("Connection service","Server id is: \"$param\". Storing it and setting state to Connected ")
         serviceModel.serverId = param
         serviceModel.profile.serverId = param
-        serviceModel.profile.teamEntry = teamEntry?.toHashSet() ?: hashSetOf()
+        serviceModel.profile.teamEntry =  CopyOnWriteArraySet(teamEntry?.toHashSet() ?: setOf())
         serviceModel.isConnected = true
         serviceModel.connectionState = ConnectionState.CONNECTED
 
@@ -256,6 +294,19 @@ class ConnectionService : Service() {
                 25.0 -> teamModel.updateTeam(params)
                 26.0 -> runBlocking { serviceModel.manageLocationShareStateTeamWide(params) }
                 28.0 -> runBlocking { serviceModel.manageIndividualLocationShareChange() }//TODO add logic to distinguish if it is team or user}
+                29.0 -> teamModel.parseTeamLocUpdate(params)
+
+                40.0 -> pointModel.parsePointCreation(params)
+                41.0 -> pointModel.parsePointCreationResponse(params)
+                42.0 -> pointModel.parseDeletePoint(params)
+                44.0 -> pointModel.handleSync(params)
+
+                60.0 -> chatModel.parseChatCreation(params)
+                61.0 -> chatModel.parseChatDeletion(params)
+                62.0 -> {}//TODO
+                63.0 -> {}//TODO
+                64.0 -> chatModel.parseMessage(params)
+                65.0 -> chatModel.parseMultipleMessages(params)
             }
         //}
     }
@@ -273,15 +324,7 @@ class ConnectionService : Service() {
             }
             else -> {
                 unknownFrameCounter++
-                if(unknownFrameCounter >= 6)
-                {
-                    session.send(Frame.Close(CloseReason(CloseReason.Codes.NOT_CONSISTENT,"Too many unknown frames")))
-                    serviceModel.isConnected = false
-                    serviceModel.error = true
-                    serviceModel.errorString = "Too many unknown frames"
-                    serviceModel.connectionState = ConnectionState.ERROR
-
-                }
+                Log.d("Connection service","Got an unknown frame, current count is $unknownFrameCounter")
             }
         }
     }
@@ -322,9 +365,15 @@ class ConnectionService : Service() {
                         if(serviceModel.sharingLocation)
                         {
                             //TODO just check if location stops
+                            sharingLocationJobHandler?.session = this@ws
                             sharingLocationJobHandler?.startSharingLocation(serviceModel.period)
                         }
+                        teamModel.teamLocationUpdateHandlers.forEach {
+                            it.startSharingLocation()
+                        }
+                        chatModel.fetchNewestMessages()
                     }
+                    pointModel.sendSync()
 
                     for( frame in incoming)
                     {
@@ -350,8 +399,11 @@ class ConnectionService : Service() {
             } catch (e: Exception)
             {
                 //when server says error during init phase service will stop but when there will be exception service will survive
-                Log.d("Connection service", "Experienced exception!\nMessage: ${e.message}\nStopping location share")
+                Log.d("Connection service", "Experienced exception!\nMessage: ${e.message}\n${e.stackTraceToString()}\nStopping location share")
                 sharingLocationJobHandler?.stopSharingLoc()
+                teamModel.teamLocationUpdateHandlers.forEach {
+                    it.stopSharingLoc()
+                }
                 serviceModel.sharingLocation = false
 
 
@@ -451,7 +503,12 @@ class ConnectionService : Service() {
     fun sendMessage(jsonString: String)
     {
         runOnThread {
-            session.send(Frame.Text(jsonString))
+            try {
+                session.send(Frame.Text(jsonString))
+            } catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
         }
     }
     fun createTeamMessage(teamName: String, teamIcon: String, topTeamId: String)
@@ -488,6 +545,41 @@ class ConnectionService : Service() {
     {
         sendMessage(ClientMessage.userLocToggle(teamId, userId))
     }
+
+    fun sendPoint(id: Long)
+    {
+        CoroutineScope(Dispatchers.IO).launch {
+            pointModel.sendPoint(id)
+        }
+    }
+
+    fun deletePoint(id: String)
+    {
+        sendMessage(ClientMessage.deletePoint(id))
+    }
+
+    fun manuallySyncPoints()
+    {
+        CoroutineScope(Dispatchers.IO).launch{
+            pointModel.sendSync()
+        }
+    }
+
+    fun createChatRoom(name: String, members: List<String>)
+    {
+        sendMessage(ClientMessage.createChatRoom(name, members))
+    }
+
+    suspend fun sendChatMessage(chatMessage: ChatMessage)
+    {
+        chatModel.sendMessage(chatMessage)
+    }
+
+    fun sendFetchMessages(cap: Long, chatId: String)
+    {
+       sendMessage(ClientMessage.fetchMessages(cap, chatId))
+    }
+
     private fun runOnThread(code: suspend () -> Unit)
     {
         thread {
@@ -534,19 +626,19 @@ class ConnectionService : Service() {
             putBoolean("Service_Running",false)
             apply()
         }
-            
-        //deleting user points will be done manually so before ending
-        //I must first copy user list into database or something
+
         //TODO for now I will delete them for the testing sake but when I will put in database I wont delete them here
         //TODO sometimes this throws concurrent modification exception so check on that
 
+        pointModel.dbHelper.close()
+
+        chatModel.dbHelper.removeAllChatRooms()
+        chatModel.dbHelper.close()
         try {
             teamModel.clearTeams()
             serviceModel.listOfUsers.forEach { profile ->
-               // serviceModel.removeUserAndHisLocation(profile.serverId,this) //removeUserAndHisLocation(profile.serverId,this)
                 serviceModel.removePoint(profile,this)
             }
-            //serviceModel.listOfUsers.removeAll { true }
             serviceModel.clearUsers()
         } catch (e:Exception)
         {

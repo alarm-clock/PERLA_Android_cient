@@ -1,14 +1,15 @@
 package com.example.jmb_bms.view
 
+import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.twotone.Map
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,18 +19,28 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.jmb_bms.ui.theme.*
 import locus.api.android.utils.LocusUtils
 
 @Composable
 fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColor: ButtonColors,
                backButtonLogic: () -> Unit, onClicked: () -> Unit )
 {
+    val oneIsNotNull = (rButtonText != null) || (rButtonIcon != null)
     val context = LocalContext.current
-    Column {
+    val scheme = LocalTheme.current
+
+    Row(
+        modifier = Modifier.fillMaxWidth().background(scheme.primary)
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.width(IntrinsicSize.Min).padding(horizontal = 1.dp).height(IntrinsicSize.Max)
+            modifier = Modifier
+                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .border(1.dp,if(isSystemInDarkTheme()) darkCianColor else Color.Transparent,RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp) )
+                .height(IntrinsicSize.Max)
+                .fillMaxWidth() //.padding(horizontal = 1.dp)
         ){
             Button(
                 shape = RoundedCornerShape(
@@ -38,8 +49,8 @@ fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColo
                     topEnd = 0.dp,
                     bottomEnd = 0.dp
                 ),
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                colors = ButtonColors(Color.Blue,Color.White,Color.Gray,Color.Gray),
+                modifier = Modifier.weight( if(oneIsNotNull) 1f else 1.0f ).fillMaxHeight(),
+                colors = ButtonColors(scheme.secondary,scheme.onSecondary,Color.Gray,Color.Gray),
                 onClick = backButtonLogic){
                 Column {
                     Row (verticalAlignment = Alignment.CenterVertically){
@@ -49,13 +60,19 @@ fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColo
                 }
             }
             Button(
-                modifier = Modifier.weight(if(rButtonText != null || rButtonIcon != null ) 0.4f else 1.0f).fillMaxHeight(),
-                shape = RoundedCornerShape(0,0,0,0),
-                onClick = {LocusUtils.callStartLocusMap(context)}
+                modifier = Modifier
+                    .weight(if( oneIsNotNull ) 0.4f else 1.0f)
+                    .fillMaxHeight(),
+                colors = ButtonColors(if(isSystemInDarkTheme()) Color(20,0,20) else Purple80, scheme.onPrimary,scheme.disabledButton,scheme.disabledButton),
+                shape = RoundedCornerShape(0.dp,if( oneIsNotNull ) 0.dp else 16.dp ,0.dp,0.dp),
+                onClick = {
+                    LocusUtils.callStartLocusMap(context)
+                    (context as? ComponentActivity)?.finish()
+                }
             ){
-                Icon(Icons.TwoTone.Map,"To map",Modifier.fillMaxSize())
+                Icon(Icons.TwoTone.Map,"To map",Modifier.fillMaxSize(), tint = scheme.onSecondary)
             }
-            if(rButtonText != null || rButtonIcon != null )
+            if(oneIsNotNull)
             {
                 Button(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -67,11 +84,11 @@ fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColo
                     ),
                     colors = rButtonStateColor,
                     onClick = onClicked
-                ){
-                    if(rButtonText != null)
+                ) {
+                    if (rButtonText != null)
                         Text(rButtonText)
-                    else if( rButtonIcon != null)
-                        Icon(rButtonIcon,"menu")
+                    else if (rButtonIcon != null)
+                        Icon(rButtonIcon, "menu")
                 }
             }
         }

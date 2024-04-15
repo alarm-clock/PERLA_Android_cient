@@ -10,6 +10,9 @@ import com.example.jmb_bms.connectionService.ConnectionService
 import com.example.jmb_bms.connectionService.ConnectionState
 import com.example.jmb_bms.connectionService.in_app_communication.InnerCommunicationCentral
 import com.example.jmb_bms.model.RefreshVals
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import locus.api.android.ActionDisplayPoints
 import locus.api.android.objects.PackPoints
 import locus.api.objects.extra.Location
@@ -17,11 +20,15 @@ import locus.api.objects.geoData.Point
 import locus.api.objects.styles.GeoDataStyle
 import java.io.ByteArrayOutputStream
 import java.util.Collections
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 
 class ConnectionDataAndState(val service: ConnectionService, val comCentral: InnerCommunicationCentral) {
 
     private val context = service
     val shpref: SharedPreferences = context.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE)
+
+    lateinit var teamModel: TeamRelatedDataModel
 
     val profile: UserProfile
 
@@ -58,11 +65,14 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
             comCentral.sendUpdatedState(value)
         }
 
-    var listOfUsers: MutableList<UserProfile> = Collections.synchronizedList(mutableListOf<UserProfile>())
+   /* var listOfUsers: MutableList<UserProfile> = Collections.synchronizedList(mutableListOf<UserProfile>())
         set(value) {
             field = value
             Log.d("AMANHY-POJEBEMTI","Setter was called from somewhere")
         }
+
+    */
+    var listOfUsers = CopyOnWriteArrayList<UserProfile>()
 
     var period: Long = 5000
     init {
@@ -82,9 +92,10 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
             errorString = "Can not connect without username and symbol code"
             connectionState = ConnectionState.ERROR
         }
-        val a = Collections.synchronizedList(listOfUsers)
+        //val a = Collections.synchronizedList(listOfUsers)
     }
 
+    //maybe also remove their points :shrug:
     fun clearUsers()
     {
         while (listOfUsers.isNotEmpty())
@@ -97,12 +108,12 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
     {
         val loc = userProfile.location ?: return
         val point = Point(userProfile.userName,loc)
-        val style = GeoDataStyle()
+
+        Log.d("Service Model","Location was not null in sendUserPointToLocus")
         val bitmap = userProfile.symbol?.imageBitmap?.asAndroidBitmap()
         val baos = ByteArrayOutputStream()
         bitmap?.compress(Bitmap.CompressFormat.JPEG,100,baos)
-        val biteArr = baos.toByteArray()
-        val base64 = android.util.Base64.encodeToString(biteArr,android.util.Base64.DEFAULT)
+
         var packPoints = PackPoints(userProfile.userName)
         packPoints.bitmap = bitmap
         packPoints.addPoint(point)
@@ -120,15 +131,10 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
     }
     fun createUser(params: Map<String, Any?> , ctx: Context)
     {
-        Log.d("Service Model","Creating user")
+
         val userName = params["userName"] as? String ?: return
-        Log.d("Service Model","Extracted username: $userName")
-
         val symbolCode = params["symbolCode"] as? String ?: return
-        Log.d("Service Model","Extracted symbolCode: $symbolCode")
-
         val serverId = params["_id"] as? String ?: return
-        Log.d("Service Model","Extracted id: $serverId")
 
         val lat = (params["location"] as? Map<String, Any?>)?.get("lat") as? Double
         val long =  (params["location"] as? Map<String, Any?>)?.get("long") as? Double
@@ -138,22 +144,20 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
 
         val teamEntry = params["teamEntry"] as? List<String> ?: return
 
-        Log.d("Service Model","Extracted teamEntry: $teamEntry")
-
         if(userName == this.profile.userName) return
         val existingUser = listOfUsers.find { it.serverId == serverId }
 
-        val newProfile = UserProfile(userName ,serverId, symbolCode, ctx ,location, teamEntry.toHashSet())
+        val newProfile = UserProfile(userName ,serverId, symbolCode, ctx ,location, CopyOnWriteArraySet(teamEntry))
 
         if(existingUser != null)
         {
             return
         } else
         {
-            Log.d("Service Model","Adding new user to listOfUsers and sending point to locus... Location is: $location")
             listOfUsers.addAndSend(newProfile)
-            Log.d("DEBUG",System.identityHashCode(listOfUsers).toString())
+
             sendUserPointToLocus(newProfile,ctx)
+            teamModel.manageTeamEntry(newProfile,true)
         }
     }
 
@@ -165,31 +169,34 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
     }
     fun updateUsersLocation(params: Map<String, Any?> , ctx: Context)
     {
-        Log.d("Service Model","In update users location function")
-        val userId = params["_id"] as? String ?: return
-        val newlat = params["lat"] as? Double
-        val newLong = params["long"] as? Double
-        Log.d("Service Model","Extracted userId: $userId -- newLat: $newlat -- newLong: $newLong")
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.d("Service Model","In update users location function")
+            val userId = params["_id"] as? String ?: return@launch
+            val newlat = params["lat"] as? Double
+            val newLong = params["long"] as? Double
+            Log.d("Service Model","Extracted userId: $userId -- newLat: $newlat -- newLong: $newLong")
 
-        Log.d("Service Model","Finding user in list...")
-        val user = listOfUsers.find { it.serverId == userId } ?: return
-        Log.d("Service Model","Found user")
+            Log.d("Service Model","Finding user in list...")
+            val user = listOfUsers.find { it.serverId == userId } ?: return@launch
+            Log.d("Service Model","Found user")
 
-        if(newlat == null || newLong == null)
-        {
-            Log.d("Service Model","Some parameter was null so removing point from locus")
-            removeUsersPointFromLocus(userId, ctx)
-            user.location = null
+            if(newlat == null || newLong == null)
+            {
+                Log.d("Service Model","Some parameter was null so removing point from locus")
+                removeUsersPointFromLocus(userId, ctx)
+                user.location = null
 
-        } else {
+            } else {
 
-            val location = Location(newlat,newLong)
-            user.location = location
+                val location = Location(newlat,newLong)
+                user.location = location
 
-            Log.d("Service Model","Sending updated location to locus...")
-            sendUserPointToLocus(user, ctx)
+                Log.d("Service Model","Sending updated location to locus...")
+                sendUserPointToLocus(user, ctx)
+            }
+            comCentral.sendUpdatedUserProfile(user)
         }
-        comCentral.sendUpdatedUserProfile(user)
+
     }
     fun removeUserAndHisLocation(userId: String, ctx: Context)
     {
@@ -199,6 +206,7 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         removePoint(user,ctx)
         Log.d("Service Model","Removing user from list of users")
         listOfUsers.removeAndSend(user)
+        teamModel.manageTeamEntry(user,false)
     }
 
     fun removePoint(userProfile: UserProfile, ctx: Context)

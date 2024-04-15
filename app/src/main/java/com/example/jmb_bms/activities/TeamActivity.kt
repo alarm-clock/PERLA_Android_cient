@@ -7,12 +7,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
-import com.example.jmb_bms.PeriodicBackroundPositionUpdater
 import com.example.jmb_bms.model.LocationRepo
-import com.example.jmb_bms.view.ServerInfoInputScreen
-import com.example.jmb_bms.view.ServerService
+import com.example.jmb_bms.view.server.ServerService
 import com.example.jmb_bms.view.permissionMissing
 import com.example.jmb_bms.viewModel.*
 
@@ -48,19 +44,9 @@ class TeamActivity : ComponentActivity() {
             val currentLocation by viewModels<LiveLocationFromLoc> {
                 LiveLocationFromLoc.create(locationRepo)
             }
-            val serverInfoVM by viewModels<ServerInfoVM> {
-                ServerInfoVM.create(applicationContext)
-            }
-
-            val serverVM by viewModels<ServerVM> {
-                ServerVM.create(applicationContext)
-            }
-
-            val transitionManager = TeamSCTransitionManager(serverVM,serverInfoVM)
-            serverInfoVM.transitionManager = transitionManager
 
             setContent {
-                ServerService(currentTime,currentLocation,serverInfoVM,serverVM){
+                ServerService(currentTime,currentLocation,/*serverInfoVM,serverVM*/){
                     Log.d("Back Button Handler","Calling activity finish")
                     finish()
                 }

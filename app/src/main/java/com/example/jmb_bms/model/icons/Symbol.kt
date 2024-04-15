@@ -48,7 +48,7 @@ class Symbol {
             field = value
         }
 
-    var iconCode : IconCode2525 = GroundIcon.UNIT
+    var iconCode : String = Icon.GROUND
     var imageBitmap: ImageBitmap? = null
         private set
 
@@ -167,62 +167,12 @@ class Symbol {
         return false
     }
 
-    private fun getWarValues(): Array<IconCode2525>?
-    {
-        when(dimension)
-        {
-            BattleDimension.SPACE -> {
-                val spaceSymbols = enumValues<SpaceSymbols>()
-                return spaceSymbols.map { it }.toTypedArray()
-            }
-            BattleDimension.AIR -> {
-                val airSymbols = enumValues<AirSymbols>()
-                return airSymbols.map { it }.toTypedArray()
-            }
-            BattleDimension.GROUND -> {
-                val groundSymbols = enumValues<GroundIcon>()
-                return groundSymbols.map { it }.toTypedArray()
-            }
-            BattleDimension.SEA_SURFACE -> {
-                val seaSymbols = enumValues<SeaSurfaceIcon>()
-                return seaSymbols.map { it }.toTypedArray()
-            }
-            BattleDimension.SEA_SUBSURFACE -> {
-                val subSurfaceSymbols = enumValues<SubSeaSurfaceIcon>()
-                return subSurfaceSymbols.map { it }.toTypedArray()
-            }
-            BattleDimension.SOF -> {
-                val sofSymbols = enumValues<SOFicon>()
-                return sofSymbols.map { it }.toTypedArray()
-            }
-            //this value is most likely not supported ath this time
-            else -> return null
-        }
-    }
+    //no way I can check that now
     fun checkAndStoreIconCode(string: String ) : Boolean
     {
-        var values : Array<IconCode2525>?
-
-        if( cScheme == CodingScheme.WAR_FIGHT)
-        {
-            values = getWarValues()
-            if ( values == null) return false
-
-        } else if( cScheme == CodingScheme.TACTICAL_GRAPH) {
-            val graphics = enumValues<TacticalGraphicsIconCode>()
-            values = graphics.map { it }.toTypedArray()
-        } else return false
-
-        values.forEach { value ->
-            if(value.iconCode == string)
-            {
-                iconCode = value
-                return true
-            }
-        }
-        return false
+        iconCode = string
+        return true
     }
-
     fun getSymbolCode() = symbolCode
     private fun editEnumsBasedOnString()
     {
@@ -244,6 +194,7 @@ class Symbol {
 
     fun getBitmap() = imageBitmap
 
+    /*
     private fun checkIfDimensionIsCorrectWithIcon(code: IconCode2525): Boolean
     {
         var returnVal: Boolean = when(code::class) {
@@ -258,6 +209,8 @@ class Symbol {
 
         return  returnVal
     }
+
+     */
     private fun checkDimensionAndScheme(): Boolean
     {
         if(cScheme == CodingScheme.INTELLIGENCE)
@@ -265,7 +218,7 @@ class Symbol {
 
         return true
     }
-
+/*
     fun editIconCode( code: IconCode2525) : Boolean
     {
         if( !checkIfDimensionIsCorrectWithIcon(code) ) return false
@@ -276,6 +229,8 @@ class Symbol {
         return true
     }
 
+
+ */
     fun fillWithMinus( string: String) : String
     {
         val suffLen = 15 - string.length
@@ -296,7 +251,7 @@ class Symbol {
         if( cScheme == CodingScheme.TACTICAL_GRAPH) newStr += cathegory.character.toString()
         else newStr += dimension.character.toString()
 
-        newStr += (status.character.toString() + iconCode.iconCode)
+        newStr += (status.character.toString() + iconCode)
 
         newStr = fillWithMinus(newStr)
 
@@ -305,6 +260,7 @@ class Symbol {
         invalidIcon = false
         return true
     }
+
 
     //TODO refactor this function so it looks better and most importantly it checks for errors
     fun createIcon(context: Context, size: String) : ImageBitmap?

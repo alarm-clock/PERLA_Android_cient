@@ -1,9 +1,11 @@
 package com.example.jmb_bms.connectionService.models
 
 import android.content.Context
+import com.example.jmb_bms.model.RefreshVals
 import com.example.jmb_bms.model.icons.Symbol
 import locus.api.objects.extra.Location
 import java.util.*
+import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.collections.HashSet
 
 
@@ -13,7 +15,10 @@ class TeamProfile(
     var teamName: String,
     var teamLead: String,
     private val appCtx: Context,
-    var teamEntry: MutableSet<String> = Collections.synchronizedSet(HashSet<String>())
+    var teamLocation: Location?,
+    var teamEntry: MutableSet<String> = Collections.synchronizedSet(HashSet<String>()),
+    var thisClientSharingLoc: Boolean = false,
+    var sharingLocDelay: RefreshVals = RefreshVals.S5
 )
 {
     var teamIcon = teamIcon
@@ -24,7 +29,7 @@ class TeamProfile(
 
     var teamSymbol = Symbol(teamIcon,appCtx)
 
-    fun copy() = TeamProfile(_id, teamIcon, teamName, teamLead, appCtx, teamEntry)
+    fun copy() = TeamProfile(_id, teamIcon, teamName, teamLead, appCtx, teamLocation ,teamEntry, thisClientSharingLoc, sharingLocDelay)
 
     companion object{
 
@@ -34,15 +39,14 @@ class TeamProfile(
             val teamName = params["teamName"] as? String ?: return null
             val teamIcon = params["teamIcon"] as? String ?: return null
             val teamLead = params["teamLead"] as? String ?: return null
-            //val teamLocationMap = params["teamLocation"] as? Map<String, Any?> ?: return null
-           // val lat = teamLocationMap["lat"] as? Double ?: return null
-           // val long = teamLocationMap["long"] as? Double ?: return null
-            //prepared for future
-           // val teamLocation = Location(lat,long)
+            val lat = (params["teamLocation"] as? Map<String, Any?>)?.get("lat") as? Double
+            val long = (params["teamLocation"] as? Map<String, Any?>)?.get("long") as? Double
+
+            val teamLocation = if(lat != null && long != null) Location(lat,long) else null
             val teamEntry = params["teamEntry"] as? List<String> ?: return null
 
             return TeamProfile(
-                _id,teamIcon,teamName,teamLead,appCtx,teamEntry.toHashSet()
+                _id,teamIcon,teamName,teamLead,appCtx,teamLocation, CopyOnWriteArraySet(teamEntry)
             )
         }
     }

@@ -16,6 +16,11 @@ object LocusVersionHolder {
     }
     fun getLv(): LocusVersion? = locusVersion
 
+    fun getLvWithStore(ctx: Context): LocusVersion?{
+        checkAndSotreLocVer(ctx)
+        return getLv()
+    }
+
     fun getLvNotNull(): LocusVersion = locusVersion!!
 
 }

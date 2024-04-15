@@ -3,12 +3,13 @@ package com.example.jmb_bms.model
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.jmb_bms.model.icons.Symbol
+import com.example.jmb_bms.model.icons.SymbolModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ServerInfo(context: Context, private val shPref: SharedPreferences) {
+class ServerInfo(context: Context, private val shPref: SharedPreferences): SymbolModel {
 
     var ipV4: String = ""
         set(value) {
@@ -69,11 +70,11 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences) {
     var userNameWasEntered: Boolean = false
         private set
 
-    fun everyThingEntered() = (userNameWasEntered && portWasEntered && ipV4WasEntered && symbolIsValid())
+    override fun everyThingEntered() = (userNameWasEntered && portWasEntered && ipV4WasEntered && symbolIsValid())
 
-    fun symbolIsValid() = (symbol.imageBitmap != null) //&& !symbol.invalidIcon
+    override fun symbolIsValid() = (symbol.imageBitmap != null) //&& !symbol.invalidIcon
 
-    var symbolString = ""
+    override var symbolString = ""
         set(value)
         {
             shPref.editPreferences { editor ->
@@ -83,9 +84,9 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences) {
             field = value
         }
 
-    val symbol : Symbol
+    override var symbol : Symbol
 
-    var menuIdsString = ""
+    override var menuIdsString = ""
         set(value) {
             shPref.editPreferences {editor ->
                 editor.putString("ServerInfo_IconMenuLists",value)

@@ -1,0 +1,4 @@
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- <external-path name="jmb_bms_images" path="Pictures"/> -->
+    <files-path name="jmb_bms_images" path="."/>
+</paths>

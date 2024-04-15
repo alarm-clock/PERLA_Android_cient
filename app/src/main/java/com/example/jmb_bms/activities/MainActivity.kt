@@ -1,21 +1,16 @@
 package com.example.jmb_bms.activities
 
-import android.content.ComponentName
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import com.example.jmb_bms.LocusVersionHolder
-import com.example.jmb_bms.PeriodicBackroundPositionUpdater
 import com.example.jmb_bms.model.LocationRepo
-import com.example.jmb_bms.model.MainMenuItems
+import com.example.jmb_bms.model.menu.MainMenuItems
+import com.example.jmb_bms.model.database.points.PointDBHelper
 import com.example.jmb_bms.view.mainMenu
 import com.example.jmb_bms.viewModel.LiveLocationFromLoc
 import com.example.jmb_bms.viewModel.LiveTime
-import kotlinx.coroutines.runBlocking
 
 import locus.api.android.objects.LocusVersion
 import locus.api.android.utils.IntentHelper
@@ -35,6 +30,10 @@ class MainActivity : ComponentActivity(){ //AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val db = PointDBHelper(this,null)
+        db.sendAllPointsToLoc(this)
+        db.close()
+
         LocusVersionHolder.checkAndSotreLocVer(this)
 
         if( LocusVersionHolder.getLv() == null ) return
@@ -48,11 +47,9 @@ class MainActivity : ComponentActivity(){ //AppCompatActivity() {
 
         if(IntentHelper.isIntentMainFunction(intent))
         {
-            println("|----------------------------- Over Here MOtherFucker 69 -------------------------|")
             IntentHelper.handleIntentMainFunction(this,intent, object : IntentHelper.OnIntentReceived{
 
                 override fun onReceived(lv: LocusVersion, locGps: Location?, locMapCenter: Location?) {
-
                     setContent {
                         mainMenu(currentTime, currentLocation, menuItems){ finish() }
                     }
@@ -61,24 +58,19 @@ class MainActivity : ComponentActivity(){ //AppCompatActivity() {
 
                 }
             })
-
         }
         else if( IntentHelper.isIntentPointTools(intent))
         {
-            setContent {
-                mainMenu(currentTime, currentLocation, menuItems){ finish() }
-            }
-            //val dataset = arrayOf("Chat" , "Orders" , "Team" , "Settings" , "Points Management") utManager(this@MainActivity)
-
+            val point = IntentHelper.getPointFromIntent(this,intent);
         }
         else if (IntentHelper.isIntentPointsTools(intent))
         {
-            val point = IntentHelper.getPointFromIntent(this,intent);
-            //runBlocking { service.sendPoint(point!!); }
+            finish()
         }
         else
         {
             LocusUtils.callStartLocusMap(this)
+            finish()
         }
 
     }

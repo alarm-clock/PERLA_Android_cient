@@ -1,10 +1,14 @@
 package com.example.jmb_bms.connectionService
 
+import android.content.Context
 import com.example.jmb_bms.connectionService.models.UserProfile
+import com.example.jmb_bms.model.ChatMessage
+import com.example.jmb_bms.model.database.points.PointRow
+import com.example.jmb_bms.model.utils.getOriginalFileName
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.*
 
 
 class ClientMessage {
@@ -118,6 +122,130 @@ class ClientMessage {
                  put("userId",userId)
              }.toString()
         }
+
+        fun teamLocationUpdate(teamId: String, update: String): String
+        {
+            return buildJsonObject {
+                put(OPCODE, 29)
+                put("_id", teamId)
+                put("lat", update.substring(0,update.indexOfFirst { it == '-' }).toDouble())
+                put("long", update.substring(update.indexOfFirst { it == '-' } + 1, update.length).toDouble())
+            }.toString()
+        }
+
+        fun teamLocationUpdatingStop(teamId: String): String
+        {
+            return buildJsonObject {
+                put(OPCODE, 29)
+                put("_id",teamId)
+            }.toString()
+        }
+
+        fun failedTransactionAck(id: String): String
+        {
+            return buildJsonObject {
+                put(OPCODE,49)
+                put("transactionId",id)
+            }.toString()
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        fun createPoint(point: PointRow, context: Context): String
+        {
+            return buildJsonObject {
+                put(OPCODE,40)
+                put("serverId",point.serverId)
+                put("name",point.name)
+                put("descr",point.descr)
+                put("symbol",point.symbol)
+                put("menuStr",point.menuString)
+                putJsonArray("files"){
+                    this.addAll(point.uris?.map {
+                         it.getOriginalFileName(context)
+                    }?.toList() ?: listOf()
+                    )
+                }
+                put("owner",point.ownerId)
+                put("lat",point.location.latitude)
+                put("long",point.location.longitude)
+
+            }.toString()
+        }
+
+        fun deletePoint(serverId: String): String
+        {
+            return buildJsonObject {
+                put(OPCODE,42)
+                put("serverId",serverId)
+            }.toString()
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        fun syncRequest(ids: List<String>): String
+        {
+            return buildJsonObject {
+                put(OPCODE,44)
+                putJsonArray("ids"){
+                    this.addAll(ids)
+                }
+            }.toString()
+        }
+
+        fun fetchMessages(cap: Long, chatId: String): String
+        {
+            return buildJsonObject {
+                put(OPCODE,65)
+                put("_id",chatId)
+                put("cap",cap)
+            }.toString()
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        fun sendMessage(message: ChatMessage, transactionId: String): String
+        {
+            return buildJsonObject {
+                put(OPCODE, 64)
+                put("transactionId", transactionId)
+                put("_id",message.chatRoomId)
+                put("text", message.text)
+                if (message.files != null) {
+                    putJsonArray("files") {
+                        this.addAll(message.files.map { it.toString() })
+                    }
+                }
+                if(message.points != null) {
+                    putJsonArray("points") {
+                        this.addAll(message.points.map { it.id.toString() })
+                    }
+                }
+
+            }.toString()
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        fun createChatRoom(name: String, members: List<String>): String
+        {
+            return buildJsonObject {
+                put(OPCODE,60)
+                put("name",name)
+                putJsonArray("memberIds"){
+                    this.addAll(members)
+                }
+            }.toString()
+        }
+
+        /*fun updatePoint(point: PointRow, context: Context): String
+        {
+            return buildJsonObject {
+                put(OPCODE,43)
+                put("serverId",point.serverId)
+                put("name",point.name)
+                put("descr",point.descr)
+                put("symbol",point.symbol)
+                put("menuStr",point.menuString)
+
+            }.toString()
+        }*/
     }
 }
 fun parseServerJson(json: String): Map<String, Any?>

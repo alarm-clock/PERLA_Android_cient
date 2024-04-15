@@ -14,16 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
-import com.example.jmb_bms.model.MenuItem
-import com.example.jmb_bms.model.MenuItems
+import com.example.jmb_bms.model.menu.MenuItem
+import com.example.jmb_bms.model.menu.MenuItems
+import com.example.jmb_bms.ui.theme.LocalTheme
+import com.example.jmb_bms.ui.theme.MyTypographyDark
+import com.example.jmb_bms.ui.theme.TestTheme
 import com.example.jmb_bms.viewModel.LiveLocationFromLoc
 import com.example.jmb_bms.viewModel.LiveTime
 import org.burnoutcrew.reorderable.*
@@ -34,17 +34,18 @@ fun RowData( longestString: Int,name: String, icon: ImageVector)
 {
     Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(64.dp))
     Spacer(modifier = Modifier.width(100.dp))
-    Text(name, fontSize = 35.sp, modifier = Modifier.width((longestString * 16).dp))
+    Text(name, fontSize = 35.sp, modifier = Modifier.width((longestString * 16).dp), color = MaterialTheme.colorScheme.onPrimary)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Item(menuItem: MenuItem, longestString: Int, clickable: Boolean = true)
 {
+    val scheme = LocalTheme.current
     Row(
-        modifier = if(clickable) Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        modifier = if(clickable) Modifier.background(scheme.primary).fillMaxWidth().padding(horizontal = 8.dp)
             .heightIn(min = 100.dp).clickable { menuItem.onAction() }
-            else Modifier.fillMaxWidth().padding(horizontal = 8.dp).heightIn(min = 100.dp),
+            else Modifier.background(scheme.primary).fillMaxWidth().padding(horizontal = 8.dp).heightIn(min = 100.dp),
 
         verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -61,12 +62,13 @@ fun Divider ( color : Color, thicknessDp: Dp)
 @Composable
 fun ClasisMenu(menuItems: MenuItems, padding: PaddingValues, longestString: Int)
 {
+    val scheme = LocalTheme.current
     LazyColumn(modifier = Modifier.padding(padding)) {
         itemsIndexed(menuItems.items) { index: Int, menuItem: MenuItem ->
             Item(menuItem, longestString)
 
             if (index < menuItems.items.lastIndex) {
-                Divider(Color.Black, 1.dp)
+                Divider(scheme.onPrimary, 1.dp)
             }
         }
     }
@@ -77,6 +79,7 @@ fun ReorderableMenu(menuItems: MenuItems, padding: PaddingValues, longestString:
 {
     val data = remember { mutableStateOf(menuItems.items) }
     val hapticFeedback = LocalHapticFeedback.current
+    val scheme = LocalTheme.current
 
     val state = rememberReorderableLazyListState(onMove = {old , new ->
 
@@ -96,7 +99,7 @@ fun ReorderableMenu(menuItems: MenuItems, padding: PaddingValues, longestString:
 
             ReorderableItem(state, key = menuItem.hardCodeID){ isDragging ->
                 val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
-                val color = if(isDragging) MaterialTheme.colorScheme.surfaceBright else MaterialTheme.colorScheme.surface
+                val color = if(isDragging) MaterialTheme.colorScheme.surfaceBright else scheme.primary
                 Column(modifier = Modifier.shadow(elevation.value).background(color)) {
 
                     Item(menuItem, longestString,false)
@@ -121,12 +124,14 @@ fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocati
     val longestString = menuItems.longestString
     var enableReord by remember { mutableStateOf(false)}
 
-    Box( modifier = Modifier.fillMaxSize().background(Color.Gray))
+    val scheme = LocalTheme.current
+
+    Box( modifier = Modifier.background(scheme.primary).fillMaxSize())
     {
         Scaffold(
             bottomBar = {BottomBar1( if(enableReord) "Finish" else "Manage Tiles",null,
-                if(enableReord) ButtonColors(Color.Cyan, Color.White, Color.Gray, Color.Gray)
-                else ButtonColors(Color.Blue, Color.White, Color.Gray, Color.Gray),
+                if(enableReord) ButtonColors(scheme.tertiary, scheme.onSecondary, Color.Gray, Color.Gray)
+                else ButtonColors(scheme.secondary, scheme.onSecondary, Color.Gray, Color.Gray),
                 backButtonLogic){ enableReord = !enableReord} },
             topBar = {
                 MenuTop1(currTime,currLoc)
@@ -146,9 +151,11 @@ fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocati
 
 
 @Composable
-fun mainMenu( currTime : LiveTime, currLoc: LiveLocationFromLoc, menuItems: MenuItems, backButtonLogic: () -> Unit)
+fun mainMenu(currTime : LiveTime, currLoc: LiveLocationFromLoc, menuItems: MenuItems, backButtonLogic: () -> Unit)
 {
-    ScrollableMenu(menuItems,currTime,currLoc, backButtonLogic)
+    TestTheme() {
+        ScrollableMenu(menuItems,currTime,currLoc, backButtonLogic)
+    }
 }
 
 //For preview purposes only

@@ -1,10 +1,13 @@
 package com.example.jmb_bms.viewModel
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.jmb_bms.model.LocationRepo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import locus.api.android.ActionBasics
 import locus.api.android.utils.LocusUtils
 import java.util.Timer
@@ -17,10 +20,21 @@ class LiveLocationFromLoc(private val locationRep: LocationRepo) : ViewModel() {
 
     private var collectionJob: Job? = null
 
+    var cnt = 0
+
     init{
         collectionJob = viewModelScope.launch {
-            locationRep.getLocUpdates().collect{ update -> //collecting from locationRep flow
-                __location.value = update
+            withContext(Dispatchers.IO)
+            {
+                locationRep.getLocUpdates().collect{ update -> //collecting from locationRep flow
+                    __location.postValue( update )
+                    if(cnt++ == 50)
+                    {
+                        Log.d("LiveLocationFromLoc","Suggesting garbage dump")
+                        System.gc()
+                        cnt = 0
+                    }
+                }
             }
         }
     }
