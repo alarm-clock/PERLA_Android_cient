@@ -6,6 +6,7 @@ import mil.nga.mgrs.MGRS
 //conversion from lat long to MGRS and adding some spaces for better readability
 fun wgs84toMGRS(loc: Location) = addSpacesInTheMGRScoordinate( MGRS.from(loc.longitude,loc.latitude).toString() ) ?: "Error in conversion"
 
+fun wgs84toMGRS(loc: android.location.Location) = addSpacesInTheMGRScoordinate( MGRS.from(loc.longitude,loc.latitude).toString() ) ?: "Error in conversion"
 fun addSpacesInTheMGRScoordinate(coordinate: String): String?
 {
     var _coordinate = coordinate

@@ -1,12 +1,13 @@
 package com.example.jmb_bms.viewModel
 
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-class LiveTime : ViewModel() {
+class LiveTime : ViewModel()  { //ViewModel() {
 
     private val __curentTime = MutableLiveData<String>()
     val currentTime: LiveData<String> get() = __curentTime

@@ -76,6 +76,7 @@ class LiveChatRooms(
 
         if(add)
         {
+
             val row = dbHelper.getChatRoom(id) ?: return
             val existing = tmp.find { it.info.value.id == id }
 
@@ -91,6 +92,10 @@ class LiveChatRooms(
                     MutableStateFlow(listOf())
                 )
             )
+            if(pickedRoom.value == null)
+            {
+                pickRoom(row.id)
+            }
         } else
         {
             tmp.removeIf{ it.info.value.id == id}

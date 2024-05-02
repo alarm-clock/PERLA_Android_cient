@@ -25,13 +25,14 @@ class MainMenuItems(shPref: SharedPreferences, context: Context) : MenuItems {
             val intent = Intent(context, TeamActivity::class.java)
             context.startActivity(intent)
         }),
-        MainMenuItem("Settings", Icons.Filled.Settings,3, {}),
-        MainMenuItem("Formatted Messages", Icons.Filled.Textsms,4, {}),
-        MainMenuItem("Map Drawing", Icons.TwoTone.Map,5, {}),
-        MainMenuItem("Points Management", Icons.TwoTone.Cloud,6, {
+        //MainMenuItem("Settings", Icons.Filled.Settings,3, {}),
+        //MainMenuItem("Formatted Messages", Icons.Filled.Textsms,4, {}),
+        //MainMenuItem("Map Drawing", Icons.TwoTone.Map,5, {}),
+        MainMenuItem("Points Management", Icons.TwoTone.Cloud,3, {
             val intent = Intent(context,PointActivity::class.java)
             context.startActivity(intent)
         }),
+        /*
         MainMenuItem("Files",Icons.TwoTone.FileCopy,7, {} ),
         MainMenuItem("Clear shPrfs",Icons.Filled.Settings,8,{
             val intent = Intent(context, ClearSharedPrefDebug::class.java)
@@ -40,6 +41,7 @@ class MainMenuItems(shPref: SharedPreferences, context: Context) : MenuItems {
         MainMenuItem("E", Icons.Filled.Settings, 9,{
             val intent = Intent(context, E::class.java)
             context.startActivity(intent)}),
+*/
     )
     override val items : List<MainMenuItem> get() = listOfItems
 

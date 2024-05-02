@@ -16,11 +16,10 @@ class ServiceBinder(private val appCtx: Context, private val callBacksForRegiste
 
     var service : ConnectionService? = null
 
-    val serviceConnection = object : ServiceConnection {
+    private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, serviceBin: IBinder?) {
             val binder = serviceBin as ConnectionService.LocalBinder
             service = binder.getService()
-
             setCallbacks()
         }
 

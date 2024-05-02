@@ -13,8 +13,8 @@ android {
         minSdk = 29
         //noinspection EditedTargetSdkVersion
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 5
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -117,8 +117,8 @@ dependencies {
     implementation("com.github.asamm:logger-asamm:2.2")
     implementation("com.asamm:locus-api-android:0.9.50")
     implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("io.ktor:ktor-client-core-jvm:2.3.8")
-    implementation("io.ktor:ktor-client-cio-jvm:2.3.8")
+    implementation("io.ktor:ktor-client-core-jvm:2.3.9")
+    implementation("io.ktor:ktor-client-cio-jvm:2.3.9")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.1.0")

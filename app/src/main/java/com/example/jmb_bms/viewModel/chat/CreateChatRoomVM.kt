@@ -17,11 +17,11 @@ import kotlinx.coroutines.launch
 
 class CreateChatRoomVM(appCtx: Context): ViewModel(){
 
-    val liveUsers = LiveUsers()
+    val liveUsers = LiveUsers(appCtx)
 
     val liveServiceState = LiveServiceState()
 
-    val serviceBinder = ServiceBinder(appCtx, listOf(liveUsers,liveServiceState))
+    private val serviceBinder = ServiceBinder(appCtx, listOf(liveUsers,liveServiceState))
 
     private var _trimmedName: String? = null
     val chatName = MutableLiveData("")
@@ -56,12 +56,16 @@ class CreateChatRoomVM(appCtx: Context): ViewModel(){
     fun createChatRoom()
     {
         loading.value = true
-        serviceBinder.service?.createChatRoom(_trimmedName!!,pickedUsersList)
+        if(canCreateRoom.value)
+        {
+            serviceBinder.service?.createChatRoom(_trimmedName!!,pickedUsersList)
+        }
     }
 
 
     override fun onCleared() {
         super.onCleared()
+        liveUsers.onDestroy()
         serviceBinder.unbind()
     }
 

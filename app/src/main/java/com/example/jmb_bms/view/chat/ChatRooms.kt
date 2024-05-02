@@ -12,8 +12,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowLeft
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -47,6 +49,8 @@ import com.example.jmb_bms.view.MenuTop4
 import com.example.jmb_bms.viewModel.LiveLocationFromLoc
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.chat.AllChatsVM
+import com.example.jmb_bms.viewModel.chat.ChatRoomDetailVM
+import com.example.jmb_bms.viewModel.chat.ChatRoomUsersVM
 import com.example.jmb_bms.viewModel.chat.CreateChatRoomVM
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -297,6 +301,58 @@ fun MessagesScreen(vm: AllChatsVM, paddingValues: PaddingValues, navHostControll
     }
 }
 
+@Composable
+fun ChatRoomOptButton(vm: AllChatsVM, expanded: MutableState<Boolean>,navHostController: NavController)
+{
+    val exp by expanded
+    DropdownMenu(
+        expanded = exp,
+        onDismissRequest = {
+            expanded.value = false
+        }
+    ){
+        if(vm.userIsOwner())
+        {
+            DropdownMenuItem(
+                text = { Text("Delete Chat Room", fontSize = 15.sp) },
+                trailingIcon = { Icon(Icons.Default.Delete ,"") },
+                onClick = {
+                    vm.deleteRoom()
+                    expanded.value = false
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Add users") },
+                onClick = {
+                    navHostController.navigate("Update/${vm.liveChatRooms.pickedRoom.value?.info?.value?.id}/add")
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Remove users") },
+                onClick = {
+                    navHostController.navigate("Update/${vm.liveChatRooms.pickedRoom.value?.info?.value?.id}/remove")
+                }
+            )
+
+        } else {
+            DropdownMenuItem(
+                text = { Text("Leave room") },
+                trailingIcon = {Icon(Icons.AutoMirrored.Default.ArrowLeft,"")},
+                onClick = {
+                    vm.leaveRoom()
+                    expanded.value = false
+                }
+            )
+        }
+        DropdownMenuItem(
+            text = { Text("Room detail") },
+            onClick = {
+                navHostController.navigate("Detail/${vm.liveChatRooms.pickedRoom.value?.info?.value?.id}")
+            }
+        )
+    }
+}
+
 
 
 @Composable
@@ -304,9 +360,13 @@ fun ChatRooms(currLoc: LiveLocationFromLoc, currTime: LiveTime, vm: AllChatsVM, 
 {
     TestTheme {
         Scaffold(
-            topBar = { MenuTop4(currTime,currLoc,vm.liveServiceState.connectionState,backHandler){
-                //TODO option button will change based on what screen is shown
-            }},
+            topBar = {
+                val exp = remember { mutableStateOf(false) }
+                MenuTop4(currTime,currLoc,vm.liveServiceState.connectionState,backHandler){
+                    exp.value = !exp.value
+                }
+                ChatRoomOptButton(vm,exp,navHostController)
+            },
             modifier = Modifier.statusBarsPadding().navigationBarsPadding().imePadding()
         ){padding ->
             MessagesScreen(vm,padding,navHostController)
@@ -334,6 +394,21 @@ fun ChatNavigation(currLoc: LiveLocationFromLoc, currTime: LiveTime,backHandler:
         composable("Creation"){
             val vm: CreateChatRoomVM = viewModel(factory = CreateChatRoomVM.create(ctx))
             CreateChatRoom(currTime,currLoc,vm,navController)
+        }
+        composable("Detail/{id}"){
+            val id = it.arguments?.getString("id") ?: ""
+            val vm: ChatRoomDetailVM = viewModel(factory = ChatRoomDetailVM.create(ctx,id))
+            ChatRoomInfo(currLoc, currTime, vm){
+                navController.popBackStack()
+            }
+        }
+        composable("Update/{id}/{add}"){
+            val id = it.arguments?.getString("id") ?: ""
+            val add = (it.arguments?.getString("add") ?: "") == "add"
+            val vm: ChatRoomUsersVM = viewModel(factory = ChatRoomUsersVM.create(ctx,id,add))
+            ChatInfoUpdate(currLoc, currTime, vm){
+                navController.popBackStack()
+            }
         }
     }
 }

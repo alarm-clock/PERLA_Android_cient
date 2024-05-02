@@ -23,7 +23,7 @@ class ChatActivity: ComponentActivity() {
         locationRepo = LocationRepo(applicationContext)
 
         val currentLocation by viewModels<LiveLocationFromLoc> {
-            LiveLocationFromLoc.create(locationRepo)
+            LiveLocationFromLoc.create(locationRepo, this)
         }
 
         //window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)

@@ -1,9 +1,12 @@
 package com.example.jmb_bms.view.point
 
 import android.net.Uri
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
@@ -13,7 +16,7 @@ import com.example.jmb_bms.viewModel.LiveLocationFromLoc
 import com.example.jmb_bms.viewModel.LiveTime
 
 @Composable
-fun VideoPlay(currLoc: LiveLocationFromLoc, currTime: LiveTime, uri: Uri, backHandler: () -> Unit)
+fun VideoPlay( uri: Uri)
 {
     val ctx = LocalContext.current
     val mediaItem = MediaItem.Builder().setUri(uri).build()
@@ -27,7 +30,8 @@ fun VideoPlay(currLoc: LiveLocationFromLoc, currTime: LiveTime, uri: Uri, backHa
         }
     }
 
-    DisposableEffect(AndroidView(factory = {
+    DisposableEffect(
+        AndroidView(modifier = Modifier.fillMaxSize() ,factory = {
         PlayerView(it).apply {
             player = exoPlayer
         }

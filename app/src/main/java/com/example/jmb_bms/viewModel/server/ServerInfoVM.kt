@@ -164,8 +164,9 @@ class ServerInfoVM(context: Context,) : ViewModel(), ServiceStateCallback {
     }
     fun connect()
     {
-        applicationContext.applicationInfo
+        //applicationContext.applicationInfo
         try {
+            Log.d("ServerInfoVM","here")
             applicationContext.startForegroundService(Intent(applicationContext,ConnectionService::class.java)
                 .putExtra("Caller","ServerInfoVM")
                 .putExtra("Host",ipv4.value)
@@ -177,15 +178,18 @@ class ServerInfoVM(context: Context,) : ViewModel(), ServiceStateCallback {
         }
 
     }
+    /*
     fun disconnect()
     {
         unbindService(applicationContext)
         applicationContext.stopService(Intent(applicationContext,ConnectionService::class.java).putExtra("Caller","ServerInfoVM"))
     }
 
+     */
+
     fun bindService(context: Context) {
         val intent = Intent(context, ConnectionService::class.java).putExtra("Caller","ServerInfoVM")
-        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        context.bindService(intent, serviceConnection, 0)
         Log.d("ServerInfoVm","Tried to set myself as callback. Session is: $service")
         _connectionState.postValue(service?.serviceModel?.connectionState ?: ConnectionState.NOT_CONNECTED)
         _connectionErrorMsg.postValue(service?.serviceModel?.errorString ?: "")
@@ -195,7 +199,7 @@ class ServerInfoVM(context: Context,) : ViewModel(), ServiceStateCallback {
         service?.unSetCallBack()
         if(service != null) context.unbindService(serviceConnection)
         service = null
-        //_connectionState.postValue(ConnectionState.NOT_CONNECTED)
+        _connectionState.postValue(ConnectionState.NOT_CONNECTED)
     }
     override fun onCleared() {
         super.onCleared()

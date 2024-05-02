@@ -309,7 +309,8 @@ fun PrintConnectedUsersOrTeams(serverVM: ServerVM, navHostController: NavHostCon
             enabled = !checked,
             colors = ButtonColors(scheme.pickOneBtnFromManyEn, scheme.pickOneBtnFromManyInsideEn, scheme.pickOneBtnFromManyDis, scheme.pickOneBtnFromManyInsideDis),
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(0.dp,16.dp,16.dp,0.dp)
+            shape = RoundedCornerShape(0.dp,16.dp,16.dp,0.dp),
+            border = BorderStroke(1.dp,if(isSystemInDarkTheme()) darkCianColor else Color.Transparent)
         ){
             Text("Teams", fontSize = 20.sp)
         }
@@ -394,9 +395,11 @@ fun ServerScreen(currLoc: LiveLocationFromLoc, currTime: LiveTime, serverVM: Ser
                     rButtonText = "Edit server information",
                     rButtonIcon = null,
                     rButtonStateColor = ButtonColors(scheme.secondary,scheme.onSecondary,scheme.secondary,scheme.disabledButton),
-                    backButtonLogic = backHandler,)
+                    backButtonLogic = backHandler)
                 {
+                    //Log.d("ServerScreen","edit info button")
                     serverVM.stopSharingLocation()
+                    Log.d("HERE8","HERE8")
                     serverVM.disconnect()
                     Log.d("ServerScreen","In edit connection info button")
                     changeScreen()

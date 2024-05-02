@@ -122,13 +122,17 @@ fun CreateChatRoom(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: CreateC
 {
     TestTheme {
         val scheme = LocalTheme.current
+        val canCreate by vm.canCreateRoom.collectAsState()
         Scaffold(
             topBar = { MenuTop3(currTime,currLoc,vm.liveServiceState.connectionState) },
             bottomBar = {
                 BottomBar1("Create room",null, ButtonColors(scheme.secondary,scheme.onSecondary,scheme.disabledButton,scheme.onSecondary),
                 { navHostController.popBackStack() }){
-                vm.createChatRoom()
-                navHostController.popBackStack()
+                    if(canCreate)
+                    {
+                        vm.createChatRoom()
+                        navHostController.popBackStack()
+                    }
             } },
             modifier = Modifier.statusBarsPadding().navigationBarsPadding()
         ){padding ->

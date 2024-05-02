@@ -24,14 +24,16 @@ class AllChatsVM(appCtx: Context) : ViewModel() {
     private val dbHelper = ChatDBHelper(appCtx,null)
     val liveServiceState = LiveServiceState()
     val liveChatRooms = LiveChatRooms(dbHelper,appCtx,mainAreaLoading,sideAreaLoading)
-    val serviceBinder = ServiceBinder(appCtx, listOf(liveServiceState, liveChatRooms))
+    private val serviceBinder = ServiceBinder(appCtx, listOf(liveServiceState, liveChatRooms))
 
     private var secondTime = false
     fun sendMessage(message: String)
     {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO)
+        {
+            val chatRoomId = liveChatRooms.pickedRoom.value?.info?.value?.id ?: return@launch
             val msg = ChatMessage(
-                69,liveChatRooms.pickedRoom.value?.info?.value?.id ?: "",message,null,null,"",""
+                69,chatRoomId,message,null,null,"",""
             )
             serviceBinder.service?.sendChatMessage(msg)
         }
@@ -47,6 +49,34 @@ class AllChatsVM(appCtx: Context) : ViewModel() {
                 serviceBinder.service?.sendFetchMessages(room.messages.value.first().id,room.info.value.id)
             }
         } else secondTime = true
+    }
+
+    fun userIsOwner(): Boolean
+    {
+        val id = serviceBinder.service?.getUserId()
+        return id == liveChatRooms.pickedRoom.value?.info?.value?.owner
+    }
+
+    fun leaveRoom()
+    {
+        viewModelScope.launch(Dispatchers.IO) {
+            val room = liveChatRooms.pickedRoom.value ?: return@launch
+            if(room.info.value.name != "General")
+            {
+                //serviceBinder.service?.sendLeaveRoom(room.info.value.id)
+            }
+        }
+    }
+
+    fun deleteRoom()
+    {
+        viewModelScope.launch(Dispatchers.IO) {
+            val room = liveChatRooms.pickedRoom.value ?: return@launch
+            if(room.info.value.owner == serviceBinder.service?.getUserId())
+            {
+                serviceBinder.service?.deleteChatRoom(room.info.value.id)
+            }
+        }
     }
 
     override fun onCleared() {

@@ -5,6 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.IBinder
 import android.util.Log
@@ -19,6 +21,8 @@ import com.example.jmb_bms.model.database.points.PointDBHelper
 import com.example.jmb_bms.model.database.points.PointRow
 import com.example.jmb_bms.model.icons.Symbol
 import com.example.jmb_bms.model.utils.DownloadResult
+import com.example.jmb_bms.model.utils.MimeTypes
+import com.example.jmb_bms.model.utils.PointDetailFileHolder
 import com.example.jmb_bms.model.utils.runOnThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +75,8 @@ class PointDetailVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFi
     val ownerState = MutableLiveData(false)
     val online = MutableLiveData(false)
     val loading = MutableLiveData(true)
-    val uris = mutableStateOf(listOf<Pair<Uri, MutableLiveData<Int?>?>>())
+    val uris = mutableStateOf(listOf<PointDetailFileHolder>())
+    val thumbnails = mutableListOf<Pair<Uri, Bitmap>>()
 
     val deleted = MutableStateFlow(false)
 
@@ -128,20 +133,48 @@ class PointDetailVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFi
         //ownerState.postValue()
     }
 
+    private fun getThumbnail(uri: Uri)
+    {
+        val bitmap: Bitmap?
+        val mediaMetadataRetriever = MediaMetadataRetriever()
+
+        try {
+            mediaMetadataRetriever.setDataSource(appCtx,uri)
+            bitmap = mediaMetadataRetriever.getFrameAtTime(0)
+            thumbnails.add(Pair(uri,bitmap!!))
+        }catch (e: Exception)
+        {
+            Log.d("getThumbNail","error")
+        } finally {
+            mediaMetadataRetriever.release()
+        }
+
+    }
+
+    private fun getMediaType(uri: Uri): MimeTypes
+    {
+        val mediaTypeRaw = appCtx.contentResolver.getType(uri)
+        return when {
+            mediaTypeRaw?.startsWith("image") == true -> MimeTypes.IMAGE
+            mediaTypeRaw?.startsWith("video") == true -> MimeTypes.VIDEO
+            else -> MimeTypes.UNKNOWN
+        }
+    }
     private fun initFiles()
     {
-        val newList = mutableListOf<Pair<Uri, MutableLiveData<Int?>?>>()
+        val newList = mutableListOf<PointDetailFileHolder>()
         pointRow.uris?.forEach {
             val flow = service?.pointModel?.checkIfFileIsDownloaded(it)
-            val pair: Pair<Uri, MutableLiveData<Int?>?>
+            val holder: PointDetailFileHolder
             if(flow != null){
-                pair = Pair(it,MutableLiveData(0))
-                collectFlow(pair as Pair<Uri, MutableLiveData<Int>>,flow)
+                holder = PointDetailFileHolder(it,MutableLiveData(0),getMediaType(it))
+                collectFlow(holder,flow)
             } else
             {
-                pair = Pair(it,null)
+                holder = PointDetailFileHolder(it,null,getMediaType(it))
             }
-            newList.add(pair)
+            getThumbnail(it)
+            newList.add(holder)
         }
         viewModelScope.launch {
             withContext(Dispatchers.Main){
@@ -151,7 +184,7 @@ class PointDetailVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFi
 
     }
 
-    private fun collectFlow(pair: Pair<Uri, MutableLiveData<Int>>,flow: SharedFlow<DownloadResult>){
+    private fun collectFlow(holder: PointDetailFileHolder,flow: SharedFlow<DownloadResult>){
 
         viewModelScope.launch {
             withContext(Dispatchers.IO)
@@ -159,14 +192,14 @@ class PointDetailVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFi
                 flow.collect{
                     when(it){
                         is DownloadResult.Progress -> {
-                            pair.second.postValue(it.progress)
+                            holder.loadingState?.postValue(it.progress)
                         }
                         is DownloadResult.Success -> {
-                            pair.second.postValue(100)
-                            pair.second.postValue(null)
+                            holder.loadingState?.postValue(100)
+                            holder.loadingState?.postValue(null)
                         }
                         is DownloadResult.Error -> {
-                            pair.second.postValue(-1)
+                            holder.loadingState?.postValue(-1)
                         }
                     }
                 }

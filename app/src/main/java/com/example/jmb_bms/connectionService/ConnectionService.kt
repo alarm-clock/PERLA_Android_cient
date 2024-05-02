@@ -20,16 +20,25 @@ import com.example.jmb_bms.connectionService.models.ConnectionDataAndState
 import com.example.jmb_bms.connectionService.models.PointRelatedDataModel
 import com.example.jmb_bms.connectionService.models.TeamRelatedDataModel
 import com.example.jmb_bms.model.ChatMessage
+import com.example.jmb_bms.model.database.chat.ChatDBHelper
+import com.example.jmb_bms.model.database.points.PointDBHelper
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import java.security.cert.X509Certificate
 import java.util.concurrent.CopyOnWriteArraySet
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 import kotlin.concurrent.thread
 
 class ConnectionService : Service() {
+
+    val testing = true
+
 
     private val comCentral: InnerCommunicationCentral = InnerCommunicationCentral()
     fun setCallBack(callback: ServiceStateCallback)
@@ -111,6 +120,7 @@ class ConnectionService : Service() {
     //most likely this will not be used until session is created anyway
     private var sharingLocationJobHandler : PeriodicPositionUpdater? = null
 
+
     override fun onCreate() {
         super.onCreate()
         serviceModel = ConnectionDataAndState(this,comCentral)
@@ -124,27 +134,34 @@ class ConnectionService : Service() {
         notManager.createNotificationChannel(channel)
         val notification = NotificationCompat.Builder(this,"jmb_bms_1").setContentTitle("Starting service...").build()
 
-        try {
-            startForeground(1,notification)
-            registerConnectivityCallBack()
 
-        } catch (e: Exception)
+        for(cnt in 0..10)
         {
-            serviceModel.error = true
-            serviceModel.connectionState = ConnectionState.ERROR
-            serviceModel.errorString = "Does not have permission to run as service"
-            Log.d("Service Connection", "Does not have permission to run as service")
-            doesNotHavePermission = true
-            Log.d("Service Connection", "Error in start foreground: ${e.message}")
+            try {
+                startForeground(1,notification)
+                registerConnectivityCallBack()
+                break
+
+            } catch (e: Exception)
+            {
+                serviceModel.error = true
+                serviceModel.connectionState = ConnectionState.ERROR
+                serviceModel.errorString = "Does not have permission to run as service"
+                Log.d("Service Connection", "Does not have permission to run as service")
+                doesNotHavePermission = true
+                Log.d("Service Connection", "Error in start foreground: ${e.message}")
+                //Delay(1000)
+            }
         }
     }
-
+    private var conManager : ConnectivityManager? = null
+    private var netCallback: ConnectivityManager.NetworkCallback? = null
     private fun registerConnectivityCallBack()
     {
-        val conManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        conManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val req = NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
 
-        val netCallback = object : ConnectivityManager.NetworkCallback() {
+        netCallback = object : ConnectivityManager.NetworkCallback() {
 
             private var firstCall = true
 
@@ -176,7 +193,7 @@ class ConnectionService : Service() {
                     lostWasCalled = true
                     onAvailableWasCalled = false
                     Log.d("Connection Service", "Lost internet connection. Stopping websocket!")
-                    session.cancel()
+                    //session.cancel()
                     sharingLocationJobHandler?.stopSharingLoc()
                     teamModel.teamLocationUpdateHandlers.forEach {
                         it.stopSharingLoc()
@@ -184,7 +201,7 @@ class ConnectionService : Service() {
                 }
             }
         }
-        conManager.registerNetworkCallback(req,netCallback)
+        conManager?.registerNetworkCallback(req,netCallback!!)
     }
 
     private fun setErrorState(errMsg: String)
@@ -265,52 +282,57 @@ class ConnectionService : Service() {
     {
         connect = false
         serviceModel.errorString = params["reason"] as? String ?: "No reason given"
+        //if(serviceModel.errorString == "Ping timeout")
         serviceModel.connectionState = ConnectionState.NOT_CONNECTED
 
     }
 
     private fun parseTextFrame(message: String){
         val params = parseServerJson(message)
+        Log.d("MSG",message)
         val msgId = params["opCode"] as? Double
         Log.d("Connection service", "Parsing text frame. OpCode is $msgId")
-        //runOnThread {
-            when(msgId)
+        try {
+            when(msgId?.toInt())
             {
-                0.0 -> { parseBye(params)} //bye
-                1.0 -> {} //this should never be called
-                2.0 -> {
+                0 -> { parseBye(params)} //bye
+                1 -> {} //this should never be called
+                2 -> {
                     serviceModel.createUser(params, applicationContext)
                 }
-                3.0 -> serviceModel.updateUsersLocation(params, applicationContext)
-                4.0 -> {}
-                7.0 -> {
+                3 -> serviceModel.updateUsersLocation(params, applicationContext)
+                4 -> {}
+                7 -> {
                     serviceModel.removeUserAndHisLocation(params["_id"] as? String ?: "" , applicationContext)
                 }
-                8.0 -> serviceModel.changeUserProfile(params, applicationContext)
-                20.0 -> teamModel.createTeam(params)
-                22.0 -> teamModel.deleteTeam(params)
-                23.0 -> teamModel.manageTeamEntry(params)
-                24.0 -> teamModel.changeTeamLeader(params)
-                25.0 -> teamModel.updateTeam(params)
-                26.0 -> runBlocking { serviceModel.manageLocationShareStateTeamWide(params) }
-                28.0 -> runBlocking { serviceModel.manageIndividualLocationShareChange() }//TODO add logic to distinguish if it is team or user}
-                29.0 -> teamModel.parseTeamLocUpdate(params)
+                8 -> serviceModel.changeUserProfile(params, applicationContext)
+                20 -> teamModel.createTeam(params)
+                22 -> teamModel.deleteTeam(params)
+                23 -> teamModel.manageTeamEntry(params)
+                24 -> teamModel.changeTeamLeader(params)
+                25 -> teamModel.updateTeam(params)
+                26 -> runBlocking { serviceModel.manageLocationShareStateTeamWide(params) }
+                28 -> runBlocking { serviceModel.manageIndividualLocationShareChange() }
+                29 -> teamModel.parseTeamLocUpdate(params)
 
-                40.0 -> pointModel.parsePointCreation(params)
-                41.0 -> pointModel.parsePointCreationResponse(params)
-                42.0 -> pointModel.parseDeletePoint(params)
-                44.0 -> pointModel.handleSync(params)
+                40 -> pointModel.parsePointCreation(params)
+                41 -> pointModel.parsePointCreationResponse(params)
+                42 -> pointModel.parseDeletePoint(params)
+                44 -> pointModel.handleSync(params)
 
-                60.0 -> chatModel.parseChatCreation(params)
-                61.0 -> chatModel.parseChatDeletion(params)
-                62.0 -> {}//TODO
-                63.0 -> {}//TODO
-                64.0 -> chatModel.parseMessage(params)
-                65.0 -> chatModel.parseMultipleMessages(params)
+                60 -> chatModel.parseChatCreation(params)
+                61 -> chatModel.parseChatDeletion(params)
+                62 -> {}//TODO
+                63 -> {}//TODO
+                64 -> chatModel.parseMessage(params)
+                65 -> chatModel.parseMultipleMessages(params)
             }
-        //}
+        } catch (e: Exception){
+            Log.d("ConnectionService",e.message.toString())
+            e.printStackTrace()
+        }
     }
-    private suspend fun parseMessage(frame: Frame)
+    private suspend fun handleFrame(frame: Frame)
     {
         when(frame){
             is Frame.Text -> { parseTextFrame( frame.readText())}
@@ -331,104 +353,166 @@ class ConnectionService : Service() {
 
     private fun connectAndRun(calledFromOnStart: Boolean)
     {
-        Log.d("Connection Service","Connect and function was called from " + if(calledFromOnStart) "OnStartCommand" else "Restart" )
-        client = HttpClient(CIO){
-           // install(HttpTimeout)
-            //{
-              //  requestTimeoutMillis = 15000 // 15 seconds
-             //   connectTimeoutMillis = 5000 // 5 seconds
-              //  socketTimeoutMillis = 15000 // 15 seconds
-            //}
-            install(WebSockets) {
-                //pingInterval = 15000
+        try {
+            val trustAllCerts = object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
             }
-        }
-        runBlocking {
-            try {
-                Log.d("Service data","${serviceModel.host} ${serviceModel.port} ${this@ConnectionService}")
-                client.ws(method = HttpMethod.Get,host = serviceModel.host, port = serviceModel.port, path = "/connect"){
-                    session = this@ws
-                    Log.d("Connection service","Initiating connection sequence")
-                    connectToServer()
-                    Log.d("Connection service","Sequnce completed... Connection state is: ${serviceModel.connectionState.name} ")
-                    if(serviceModel.connectionState != ConnectionState.CONNECTED)
-                    {
-                        //if(calledFromOnStart) stopSelf()
-                        return@ws
-                    }
-                    serviceModel.errorString = ""
-
-                    if(!calledFromOnStart)
-                    {
-                        serviceModel.clearUsers()
-                        teamModel.clearTeams()
-                        if(serviceModel.sharingLocation)
+            Log.d("Connection Service","Connect and function was called from " + if(calledFromOnStart) "OnStartCommand" else "Restart" )
+            client = HttpClient(CIO){
+                engine{
+                    https {
+                        if(testing)
                         {
-                            //TODO just check if location stops
-                            sharingLocationJobHandler?.session = this@ws
-                            sharingLocationJobHandler?.startSharingLocation(serviceModel.period)
+                            Log.d("HERE","--------------------------------------------------------------------------------------")
+                            trustManager = trustAllCerts
                         }
-                        teamModel.teamLocationUpdateHandlers.forEach {
-                            it.startSharingLocation()
-                        }
-                        chatModel.fetchNewestMessages()
                     }
-                    pointModel.sendSync()
-
-                    for( frame in incoming)
-                    {
-                        if(!connect){
-                            Log.d("Connection service", "User initiated disconnect... Closing websocket")
-                            send(Frame.Text(ClientMessage.bye("User disconnected")))
-                            send(Frame.Close(CloseReason(CloseReason.Codes.NORMAL,"User disconnected")))
-                            serviceModel.connectionState = ConnectionState.NOT_CONNECTED
-                            serviceModel.isConnected = false
-                            connect = false
-
-                            Log.d("Connection service","Websocket is closed. Connection state is: ${serviceModel.connectionState.name}")
-                            break
-                        }
-                        Log.d("Connection service","Parsing incoming frame")
-                        parseMessage(frame)
-                    }
-                    Log.d("Connection Service","Out of the incoming loop")
-                    if(serviceModel.connectionState != ConnectionState.ERROR) serviceModel.connectionState = ConnectionState.NOT_CONNECTED
-                    serviceModel.isConnected = false
-
                 }
-            } catch (e: Exception)
-            {
-                //when server says error during init phase service will stop but when there will be exception service will survive
-                Log.d("Connection service", "Experienced exception!\nMessage: ${e.message}\n${e.stackTraceToString()}\nStopping location share")
-                sharingLocationJobHandler?.stopSharingLoc()
-                teamModel.teamLocationUpdateHandlers.forEach {
-                    it.stopSharingLoc()
-                }
-                serviceModel.sharingLocation = false
-
-
-                Log.d("Connection service","Setting error state and sending to service state callback")
-                serviceModel.errorString = e.message ?: "Encountered error"
-                serviceModel.connectionState= ConnectionState.ERROR
-                serviceModel.isConnected = false
-
+                install(WebSockets)
             }
+            runBlocking {
+                try {
+
+                    Log.d("Service data", "${serviceModel.host} ${serviceModel.port} ${this@ConnectionService}")
+                    client.wss(
+                        method = HttpMethod.Get,
+                        host = serviceModel.host,
+                        port = serviceModel.port,
+                        path = "/connect"
+                    ) {
+                        session = this@wss
+                        Log.d("Connection service", "Initiating connection sequence")
+                        connectToServer()
+                        Log.d(
+                            "Connection service",
+                            "Sequence completed... Connection state is: ${serviceModel.connectionState.name} "
+                        )
+                        if (serviceModel.connectionState != ConnectionState.CONNECTED) {
+                            if(calledFromOnStart) stopSelf()
+                            return@wss
+                        }
+                        serviceModel.errorString = ""
+
+                        if (!calledFromOnStart) {
+                            serviceModel.clearUsers()
+                            teamModel.clearTeams()
+
+                            teamModel.teamLocationUpdateHandlers.forEach {
+                                it.startSharingLocation()
+                            }
+                            chatModel.fetchNewestMessages()
+                        }
+                        pointModel.sendSync()
+                        if (serviceModel.sharingLocation) {
+                            Log.d("Connection Service", "Starting to share location after sending sync")
+                            if (sharingLocationJobHandler == null) {
+                                Log.d("Connection Service", "sharing handler was null")
+                                sharingLocationJobHandler =
+                                    PeriodicPositionUpdater(serviceModel.period, this@ConnectionService, session, true)
+                                sharingLocationJobHandler!!.startSharingLocation(serviceModel.period)
+
+                            } else {
+                                Log.d("Connection Service", "sharing handler was null")
+                                sharingLocationJobHandler?.session = this@wss
+                                sharingLocationJobHandler?.startSharingLocation(serviceModel.period)
+                            }
+
+                        }
+
+                            for (frame in incoming) {
+                                if (!connect) {
+                                    Log.d("Connection service", "User initiated disconnect... Closing websocket")
+                                    send(Frame.Text(ClientMessage.bye("User disconnected")))
+                                    send(Frame.Close(CloseReason(CloseReason.Codes.NORMAL, "User disconnected")))
+                                    serviceModel.connectionState = ConnectionState.NOT_CONNECTED
+                                    serviceModel.isConnected = false
+                                    connect = false
+
+
+                                    Log.d(
+                                        "Connection service",
+                                        "Websocket is closed. Connection state is: ${serviceModel.connectionState.name}"
+                                    )
+                                    break
+                                }
+                                Log.d("Connection service", "Parsing incoming frame")
+                                handleFrame(frame)
+                                Log.d("Connection service", "Parsed frame")
+                            }
+
+                        if(closeReason.await()?.code == CloseReason.Codes.TRY_AGAIN_LATER.code) {
+                            connectAndRun(false)
+                        } else {
+                            Log.d("Connection Service", "Out of the incoming loop")
+                            if (serviceModel.connectionState != ConnectionState.ERROR) serviceModel.connectionState =
+                                ConnectionState.NOT_CONNECTED
+                            serviceModel.isConnected = false
+                            session.cancel()
+                            getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).edit {
+                                putBoolean("connected", false)
+                                commit()
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    //when server says error during init phase service will stop but when there will be exception service will survive
+                    Log.d(
+                        "Connection service",
+                        "Experienced exception!\nMessage: ${e.message}\n${e.stackTraceToString()}\nStopping location share"
+                    )
+                    sharingLocationJobHandler?.stopSharingLoc()
+                    teamModel.teamLocationUpdateHandlers.forEach {
+                        it.stopSharingLoc()
+                    }
+                    serviceModel.sharingLocation = false
+
+
+                    Log.d("Connection service", "Setting error state and sending to service state callback")
+                    serviceModel.errorString = e.message ?: "Encountered error"
+                    serviceModel.connectionState = ConnectionState.ERROR
+                    serviceModel.isConnected = false
+                    if (this@ConnectionService::session.isInitialized) session.cancel()
+
+                }
+            }
+        }catch (e:Exception)
+        {
+            Log.d(
+                "Connection service",
+                "Experienced exception!\nMessage: ${e.message}\n${e.stackTraceToString()}\nStopping location share"
+            )
+            serviceModel.errorString = e.message ?: "Encountered error"
+            serviceModel.connectionState = ConnectionState.ERROR
+            serviceModel.isConnected = false
         }
+
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         val caller = intent?.getStringExtra("Caller")
         //serviceModel = ConnectionDataAndState(this,comCentral)
+
+        val shPref = this.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE)
+
         serviceModel.port = intent?.getIntExtra("Port",0) ?: 0
-        serviceModel.host = intent?.getStringExtra("Host") ?: ""
+        serviceModel.host = intent?.getStringExtra("Host") ?: shPref.getString("ServerInfo_IP","") ?: ""
+
+        if(serviceModel.port == 0) serviceModel.port = shPref.getString("ServerInfo_Port","0")?.toInt() ?: 0
+
+        if(intent == null)
+        {
+            serviceModel.sharingLocation = shPref.getBoolean("Server_LocSh",false)
+        }
 
         if(doesNotHavePermission)
         {
             Log.d("Connection Service","Can not run as service so I'm not starting")
             serviceModel.connectionState = ConnectionState.ERROR
             stopSelf()
-        } else {
+        } else if( serviceModel.port != 0 && serviceModel.host != "") {
 
             Log.d("Service start", "Service was started by $caller")
 
@@ -443,11 +527,15 @@ class ConnectionService : Service() {
                 putBoolean("Service_Running", true)
                 apply()
             }
+            /*getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).edit {
+                putBoolean("connected",true)
+                commit()
+            }
+
+             */
         }
-
-        return START_NOT_STICKY
+        return START_STICKY
     }
-
     fun restartSessionWithServer()
     {
         Log.d("Connection service","In restart function... connection thread is $connectionThread")
@@ -463,7 +551,10 @@ class ConnectionService : Service() {
             }.apply {
                 name = "jmb_bms_server_session"
             }
-
+            getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).edit {
+                putBoolean("connected",true)
+                commit()
+            }
         }
     }
 
@@ -488,11 +579,20 @@ class ConnectionService : Service() {
         return true
     }
 
+    fun disconnect()
+    {
+        connect = false
+    }
+
     suspend fun stopSharingLocation(){
+        Log.d("HERE3","HERE3")
         sharingLocationJobHandler?.stopSharingLoc()
+        Log.d("HERE4","HERE4")
         serviceModel.sharingLocation = false
 
-        if(this::session.isInitialized)  session.send(Frame.Text(ClientMessage.stopUpdating()))
+        Log.d("HERE5","HERE5")
+        if(this::session.isInitialized && serviceModel.connectionState == ConnectionState.CONNECTED)  session.send(Frame.Text(ClientMessage.stopUpdating()))
+        Log.d("HERE6","HERE6")
 
     }
 
@@ -553,8 +653,9 @@ class ConnectionService : Service() {
         }
     }
 
-    fun deletePoint(id: String)
+    fun deletePoint(id: String?)
     {
+        if(id.isNullOrEmpty()) return
         sendMessage(ClientMessage.deletePoint(id))
     }
 
@@ -580,6 +681,11 @@ class ConnectionService : Service() {
        sendMessage(ClientMessage.fetchMessages(cap, chatId))
     }
 
+    fun deleteChatRoom(id: String)
+    {
+        sendMessage(ClientMessage.deleteChatRoom(id))
+    }
+
     private fun runOnThread(code: suspend () -> Unit)
     {
         thread {
@@ -588,6 +694,9 @@ class ConnectionService : Service() {
             }
         }
     }
+
+    fun getUserId(): String = serviceModel.profile.serverId
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -603,6 +712,11 @@ class ConnectionService : Service() {
             Log.d("Connection Service","Stopped location sharing")
         }
         Log.d("Connection Service","Setting connect to false")
+
+        if(netCallback != null)
+        {
+            conManager?.unregisterNetworkCallback(netCallback!!)
+        }
         connect = false
         if(this::session.isInitialized && session.isActive)
         {
@@ -630,10 +744,12 @@ class ConnectionService : Service() {
         //TODO for now I will delete them for the testing sake but when I will put in database I wont delete them here
         //TODO sometimes this throws concurrent modification exception so check on that
 
-        pointModel.dbHelper.close()
+        //pointModel.dbHelper.close()
 
-        chatModel.dbHelper.removeAllChatRooms()
-        chatModel.dbHelper.close()
+        val dbHelper = ChatDBHelper(this,null)
+        dbHelper.removeAllChatRooms()
+        dbHelper.close()
+        //chatModel.dbHelper.close()
         try {
             teamModel.clearTeams()
             serviceModel.listOfUsers.forEach { profile ->
@@ -644,5 +760,10 @@ class ConnectionService : Service() {
         {
             Log.d("Connection Service","Exception during removing...")
         }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        Log.d("Connection Service","In ONLOWMEMORY!!!!!!!!!!!!!!!!!!!!")
     }
 }

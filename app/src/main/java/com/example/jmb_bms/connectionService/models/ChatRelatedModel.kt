@@ -12,6 +12,7 @@ import com.example.jmb_bms.model.ChatMessage
 import com.example.jmb_bms.model.database.chat.ChatDBHelper
 import com.example.jmb_bms.model.database.chat.ChatRow
 import com.example.jmb_bms.model.database.points.MenuRow
+import com.example.jmb_bms.model.database.points.PointDBHelper
 import com.example.jmb_bms.model.utils.sendNotification
 import io.ktor.websocket.*
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +23,6 @@ import java.util.*
 
 class ChatRelatedModel(val service: ConnectionService, val communicationCentral: InnerCommunicationCentral) {
 
-    val dbHelper = ChatDBHelper(service,null)
 
     fun parseChatCreation(params: Map<String, Any?>)
     {
@@ -36,11 +36,13 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
 
             val newRoom = ChatRow(id,name,ownerId,members ?: listOf())
 
+            val dbHelper = ChatDBHelper(service,null)
             dbHelper.getChatRoom(id)?.let {
                 Log.d("ChatRelatedModel","chat room with id $id already exists so I'm updating it")
                 dbHelper.updateChatRoom(newRoom)
             } ?: dbHelper.addChatRoom(newRoom)
 
+            dbHelper.close()
             communicationCentral.sendChatRoomsUpdate(id,true)
         }
 
@@ -50,8 +52,10 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
     {
         val id = params["_id"] as? String ?: return
 
+        val dbHelper = ChatDBHelper(service,null)
         Log.d("ChatRelatedModel","Deleting chat with id $id")
         dbHelper.removeChatRoom(id)
+        dbHelper.close()
 
         //TODO delete files
 
@@ -70,9 +74,11 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
 
         val points = params["points"] as? List<String>
 
+        val dbHelper = PointDBHelper(service,null)
         val pointsRow = points?.map {
-            service.pointModel.dbHelper.getMenuRowByServerId(it) ?: MenuRow(-2, "Not Existing", false, "", false, false)
+            dbHelper.getMenuRowByServerId(it) ?: MenuRow(-2, "Not Existing", false, "", false, false)
         }
+        dbHelper.close()
 
         return ChatMessage(
             id.toLong(),
@@ -93,6 +99,11 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
             val message = createMsgFromParams(params) ?: return@launch
             Log.d("ChatRelatedModel","Parsing message")
             communicationCentral.sendChatMessage(message)
+
+            if(message.userName != service.serviceModel.profile.userName)
+            {
+                sendNotification(service,message.userName,message.text,NotificationCompat.PRIORITY_HIGH,message.id.toString())
+            }
         }
     }
 
@@ -151,14 +162,21 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
         service.sendMessage(ClientMessage.sendMessage(message,transactionId))
     }
 
+    suspend fun updateChatsOwner(params: Map<String, Any?>)
+    {
+
+    }
+
     fun fetchNewestMessages()
     {
         CoroutineScope(Dispatchers.IO).launch {
+            val dbHelper = ChatDBHelper(service,null)
             val rooms = dbHelper.getAllChatRooms()
             rooms?.forEach {
                 Log.d("ChatRelatedModel","Fetching newest messages for room ${it.name}")
                 service.sendMessage(ClientMessage.fetchMessages(-1,it.id))
             }
+            dbHelper.close()
         }
     }
 }

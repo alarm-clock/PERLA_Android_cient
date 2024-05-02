@@ -10,7 +10,7 @@ class MenuState(private val shPref: SharedPreferences, menuName: String) {
 
     private var orderString: String
     private val shKey = menuName + "OrderSH"
-    private val defShVal = "1-2-3-4-5-6-7"
+    private val defShVal = "1-2-3" /*-4-5-6-7*/
 
     private fun getIntFromStr() : IntArray = orderString.split("-")
         .mapNotNull { it.toIntOrNull() }.toIntArray()
@@ -32,7 +32,7 @@ class MenuState(private val shPref: SharedPreferences, menuName: String) {
         } else {
             for( counter in oldIndex downTo newIndex)
             {
-                if(counter != 0 || counter != newIndex)order[counter] = order[counter-1]
+                if(counter != 0 || counter != newIndex) order[counter] = order[counter-1]
             }
         }
     }

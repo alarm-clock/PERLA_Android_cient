@@ -22,7 +22,7 @@ class LocationRepo(private val ctx: Context, val delay: Long = 1000, private val
             //runs as long as flow runs because I want it to run while in menu
             while(true) {
                 kotlinx.coroutines.delay(delay)
-                var location: String = ""
+                var location = ""
                 LocusUtils.getActiveVersion(ctx)?.let { lv ->
                     ActionBasics.getUpdateContainer(ctx, lv)?.let { uc ->
                         location = handleUpdate(lv, uc)

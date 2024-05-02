@@ -36,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 class PointRelatedDataModel(val service: ConnectionService, val communicationCentral: InnerCommunicationCentral) {
 
-    val dbHelper = PointDBHelper(service,null)
+
 
     val downloads = CopyOnWriteArrayList<Pair<Uri, SharedFlow<DownloadResult>>>()
 
@@ -45,10 +45,12 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
     fun sendOnlinePoints()
     {
         CoroutineScope(Dispatchers.IO).launch {
+            val dbHelper = PointDBHelper(service,null)
             val unsentPoints = dbHelper.getAllUnsentPoints() ?: return@launch
             unsentPoints.forEach {
                 sendPoint(it.id)
             }
+            dbHelper.close()
         }
     }
 
@@ -62,6 +64,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         val succ = params["success"] as? Boolean ?: return
         val serverId = params["serverId"] as? String ?: return
 
+        val dbHelper = PointDBHelper(service,null)
         if(succ)
         {
             Log.d("Success",serverId)
@@ -88,6 +91,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
             point.serverId = null
             dbHelper.updatePointIdentById(point)
         }
+        dbHelper.close()
     }
 
     private suspend fun collectDownloadFlow(pair: Pair<Uri, SharedFlow<DownloadResult>>)
@@ -112,7 +116,9 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         val serverId = params["serverId"] as? String ?: return
         Log.d("DeletingPointFromServer",serverId)
 
-        val point = dbHelper.getPointByServerId(serverId) ?: return
+        val dbHelper = PointDBHelper(service,null)
+
+        val point = dbHelper.getPointByServerId(serverId) ?: return //TODO
         Log.d("DeletingPointFromServer","Found point")
         ActionDisplayPoints.removePackFromLocus(service,point.id.toString())
         point.uris?.forEach {
@@ -120,6 +126,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         }
         dbHelper.removePoint(point.id)
         communicationCentral.sendDeletedPoint(point.id)
+        dbHelper.close()
     }
 
     private suspend fun downloadPointFiles(list: List<String>?): List<Uri>?
@@ -184,7 +191,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         val packPoints = PackPoints(point.id.toString())
         packPoints.bitmap = Symbol(point.symbol,service).imageBitmap?.asAndroidBitmap()
         packPoints.addPoint(newPoint)
-        ActionDisplayPoints.sendPackSilent(service,packPoints,true)
+        ActionDisplayPoints.sendPackSilent(service,packPoints,false)
     }
 
     private suspend fun compareFilesAndManageThem(newFiles: List<String>?, point: PointRow)
@@ -228,6 +235,8 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
             val ownerId = params["ownerId"] as? String ?: return@launch
 
             if(ownerId == service.serviceModel.profile.serverId) return@launch
+
+            val dbHelper = PointDBHelper(service,null)
 
             val existingPoint = dbHelper.getPointByServerId(serverId)
 
@@ -276,10 +285,12 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
             }
             addPointToMap(point)
             communicationCentral.sendParsedPoint(point.id)
+            dbHelper.close()
         }
     }
     suspend fun sendDeletePoint(id: Long): Boolean
     {
+        val dbHelper = PointDBHelper(service,null)
         val point = dbHelper.getPoint(id) ?: return false
         if(point.serverId == null)
         {
@@ -292,12 +303,14 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
             return false
         }
         service.session.send(Frame.Text(ClientMessage.deletePoint(point.serverId!!)))
+        dbHelper.close()
         return true
     }
 
     suspend fun sendPoint(id: Long)
     {
         val requestMaker = FileSharingRequests(service,communicationCentral)
+        val dbHelper = PointDBHelper(service,null)
         val point = dbHelper.getPoint(id)
 
         if(point == null)
@@ -351,6 +364,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
                     else -> "Me"
                 }
                 dbHelper.updatePointIdentById(point)
+                dbHelper.close()
 
             } catch (e: Exception)
             {
@@ -364,6 +378,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
                 point.postedToServer = false
                 point.serverId = null
                 dbHelper.updatePointIdentById(point)
+                dbHelper.close()
             }
         } else
         {
@@ -377,6 +392,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
             point.postedToServer = false
             point.serverId = null
             dbHelper.updatePointIdentById(point)
+            dbHelper.close()
         }
     }
 
@@ -384,7 +400,9 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
     suspend fun sendUpdatePoint(id: Long)
     {
         Log.d("SendUpdate","In function")
+        val dbHelper = PointDBHelper(service,null)
         val point = dbHelper.getPoint(id) ?: return
+        dbHelper.close()
         Log.d("SendUpdate","Got point")
 
         if(!point.online || (point.ownerId != "Me" && point.ownerId != "All")) return
@@ -449,12 +467,15 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
                 NotificationCompat.PRIORITY_HIGH,
                 point.serverId ?: ""
             )
+
         }
     }
 
     suspend fun sendSync()
     {
+        val dbHelper = PointDBHelper(service,null)
         val pointIds = dbHelper.getIdServIdByOwner(true)
+        dbHelper.close()
 
         service.sendMessage(ClientMessage.syncRequest(pointIds.map { it.second }))
 
@@ -468,6 +489,8 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
     fun handleSync(params: Map<String, Any?>)
     {
         val ids = params["ids"] as? List<String> ?: return
+
+        val dbHelper = PointDBHelper(service,null)
 
         val notOwnedPoints = dbHelper.getIdServIdByOwner(false)
 
@@ -488,6 +511,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
                 communicationCentral.sendDeletedPoint(point.id)
             }
         }
+        dbHelper.close()
     }
 }
 

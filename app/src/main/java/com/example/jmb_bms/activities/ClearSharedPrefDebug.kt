@@ -36,6 +36,8 @@ class ClearSharedPrefDebug : ComponentActivity() {
             it.putString("ServerInfo_IconMenuLists","")
             it.putString("ServerInfo_Symbol", "")
 
+            it.putString("OrderSH","1-2-3")
+
             it.putBoolean("ServerInfo_IPent", false)
             it.putBoolean("ServerInfo_PortEnt", false)
             it.putBoolean("ServerInfo_UserEnt", false)

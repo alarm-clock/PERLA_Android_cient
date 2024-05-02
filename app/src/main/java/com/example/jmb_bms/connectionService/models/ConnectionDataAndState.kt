@@ -10,6 +10,7 @@ import com.example.jmb_bms.connectionService.ConnectionService
 import com.example.jmb_bms.connectionService.ConnectionState
 import com.example.jmb_bms.connectionService.in_app_communication.InnerCommunicationCentral
 import com.example.jmb_bms.model.RefreshVals
+import com.example.jmb_bms.model.icons.Symbol
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,6 +57,10 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
     var sharingLocation = false
         set(value) {
             field = value
+            shpref.edit {
+                putBoolean("Server_LocSh",value)
+                commit()
+            }
             comCentral.updateLocationSharing(value)
         }
 
@@ -65,13 +70,6 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
             comCentral.sendUpdatedState(value)
         }
 
-   /* var listOfUsers: MutableList<UserProfile> = Collections.synchronizedList(mutableListOf<UserProfile>())
-        set(value) {
-            field = value
-            Log.d("AMANHY-POJEBEMTI","Setter was called from somewhere")
-        }
-
-    */
     var listOfUsers = CopyOnWriteArrayList<UserProfile>()
 
     var period: Long = 5000
@@ -109,8 +107,7 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         val loc = userProfile.location ?: return
         val point = Point(userProfile.userName,loc)
 
-        Log.d("Service Model","Location was not null in sendUserPointToLocus")
-        val bitmap = userProfile.symbol?.imageBitmap?.asAndroidBitmap()
+        val bitmap = Symbol(userProfile.symbolCode,ctx).imageBitmap?.asAndroidBitmap()
         val baos = ByteArrayOutputStream()
         bitmap?.compress(Bitmap.CompressFormat.JPEG,100,baos)
 

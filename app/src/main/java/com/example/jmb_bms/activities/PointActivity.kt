@@ -60,7 +60,7 @@ class PointActivity: ComponentActivity() {
 
                 locationRepo = LocationRepo(applicationContext)
                 val currentLocation by viewModels<LiveLocationFromLoc> {
-                    LiveLocationFromLoc.create(locationRepo)
+                    LiveLocationFromLoc.create(locationRepo,this)
                 }
 
                 if (point?.extraData?.getParameter(1) == "jmb_bms") {
@@ -111,7 +111,7 @@ class PointActivity: ComponentActivity() {
             dbHelper = PointDBHelper(this.applicationContext, null)
             locationRepo = LocationRepo(applicationContext)
             val currentLocation by viewModels<LiveLocationFromLoc> {
-                LiveLocationFromLoc.create(locationRepo)
+                LiveLocationFromLoc.create(locationRepo,this)
             }
             val fromLoc = getSharedPreferences("Point_Menu", Context.MODE_PRIVATE).getBoolean("From_Locus",false)
             setContent{
@@ -130,7 +130,7 @@ class PointActivity: ComponentActivity() {
             dbHelper = PointDBHelper(this.applicationContext, null)
             locationRepo = LocationRepo(applicationContext)
             val currentLocation by viewModels<LiveLocationFromLoc> {
-                LiveLocationFromLoc.create(locationRepo)
+                LiveLocationFromLoc.create(locationRepo, this)
             }
             setContent {
                 AllPointScreens(Point(),currentTime,currentLocation,activityResultRegistry,dbHelper,_PointScreens.ALL,null,false, false) {

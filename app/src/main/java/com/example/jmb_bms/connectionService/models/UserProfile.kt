@@ -22,7 +22,7 @@ class UserProfile(
     var symbol: Symbol? = null
 
     init {
-        symbol = Symbol(symbolCode,context)
+        //symbol = Symbol(symbolCode,context)
     }
 
     fun copy() = UserProfile(userName,serverId,symbolCode,context,location, teamEntry)

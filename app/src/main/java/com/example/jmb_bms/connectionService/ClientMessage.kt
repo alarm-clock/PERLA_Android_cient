@@ -234,6 +234,27 @@ class ClientMessage {
             }.toString()
         }
 
+        fun deleteChatRoom(id: String): String
+        {
+            return buildJsonObject {
+                put(OPCODE,61)
+                put("_id",id)
+            }.toString()
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        fun manageChatUsers(id: String, users: List<String>, add: Boolean): String
+        {
+            return buildJsonObject {
+                put(OPCODE,62)
+                put("_id",id)
+                put("add",add)
+                putJsonArray("userIds"){
+                    addAll(users)
+                }
+            }.toString()
+        }
+
         /*fun updatePoint(point: PointRow, context: Context): String
         {
             return buildJsonObject {

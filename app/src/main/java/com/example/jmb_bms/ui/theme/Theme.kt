@@ -15,10 +15,10 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.example.jmb_bms.model.utils.MyColorPalette
 
-val darkCianColor = Color(0,60,60)
+val darkCianColor = Color(0,90,90)
 val darkGrey20 =  Color(20,20,20)
 val darkRed25 = Color(25,0,0)
-val darkOrange = Color(190,80,0)
+val darkOrange = Color(130,20,0)
 
 val DarkColorScheme = MyColorPalette(
     primary = Color.Black,

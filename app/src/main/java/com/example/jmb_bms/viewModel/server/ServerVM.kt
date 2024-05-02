@@ -19,6 +19,7 @@ import com.example.jmb_bms.connectionService.models.UserProfile
 import com.example.jmb_bms.model.RefreshVals
 import com.example.jmb_bms.model.TeamLiveDataHolder
 import com.example.jmb_bms.model.TeamPairsHolder
+import com.example.jmb_bms.model.icons.Symbol
 import com.example.jmb_bms.model.utils.centerMapInLocusJson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -152,7 +153,7 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
         if(service != null) return
         Log.d("ServerVM", "Binding to service")
         val intent = Intent(applicationContext, ConnectionService::class.java).putExtra("Caller","ServerVM")
-        applicationContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        applicationContext.bindService(intent, serviceConnection, 0)
         selectTeamOption( TeamLiveDataHolder(
             Pair(
                 TeamProfile("","","Pick a Team","",applicationContext,null, mutableSetOf()),
@@ -162,13 +163,22 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
         ))
     }
 
+    fun forceUnbind()
+    {
+        service?.unSetCallBack()
+        service?.unSetComplexDataCallBack()
+        Log.d("ServerVM","In unbindService function ")
+        applicationContext.unbindService(serviceConnection)
+        service = null
+    }
+
     fun unbindService() {
         service?.unSetCallBack()
         service?.unSetComplexDataCallBack()
         Log.d("ServerVM","In unbindService function ")
         //removed running check
         if(service != null) {
-            if(connectionState.value == ConnectionState.NOT_CONNECTED || connectionState.value == ConnectionState.ERROR)
+            if(/*connectionState.value == ConnectionState.NOT_CONNECTED ||*/ connectionState.value == ConnectionState.ERROR)
             {
                 applicationContext.stopService(Intent(applicationContext,ConnectionService::class.java))
             }
@@ -217,6 +227,7 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
     {
         runBlocking {
             service?.stopSharingLocation()
+            Log.d("HERE7","HERE7")
         }
     }
     fun connect()
@@ -250,16 +261,18 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
 
     fun disconnect()
     {
+        Log.d("HERE9","HERE9")
         val tmp = connectedUsers.value.toMutableList()
         tmp.removeAll { true }
         connectedUsers.value = tmp.toList()
 
-        unbindService()
+        forceUnbind()
         Log.d("ServerVM","Session is $service")
         applicationContext.stopService(Intent(applicationContext,ConnectionService::class.java).putExtra("Caller","ServerVM"))
         onOnServiceStateChanged(ConnectionState.NOT_CONNECTED)
         onServiceErroStringChange("")
         updateSharingLocationState(false)
+        Log.d("HERE10","HERE10")
     }
 
     fun getUsersWhichAreNotOnTeam(teamId: String) = connectedUsers.value.filter { it.value?.teamEntry?.find { teamIds -> teamIds == teamId  } == null }
@@ -335,6 +348,9 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
     override fun updatedUserListCallBack(newList: List<UserProfile>) {
 
         thread {
+            newList.forEach {
+                it.symbol = Symbol(it.symbolCode,applicationContext)
+            }
             val list = newList.map { profile ->
                 connectedUsers.value.find { it.value?.serverId == profile.serverId } ?: MutableLiveData(profile)
             }
@@ -348,8 +364,17 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
         }
     }
 
+    private fun nullifySymbols()
+    {
+        connectedUsers.value.map { it.value }.forEach {
+            it?.symbol = null
+        }
+    }
+
+
     override fun onCleared() {
         super.onCleared()
+        nullifySymbols()
         val tmp = connectedUsers.value.toMutableList()
         tmp.removeAll{true}
         connectedUsers.value = tmp
@@ -376,6 +401,9 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
     override fun setUsersAnTeams(newList: CopyOnWriteArrayList<UserProfile>,newSet: CopyOnWriteArraySet<Pair<TeamProfile,CopyOnWriteArraySet<UserProfile>>>)
     {
         val copy = connectedUsers.value.toHashSet()
+        newList.forEach {
+            it.symbol = Symbol(it.symbolCode,applicationContext)
+        }
         val list = newList.map { profile ->
             copy.find { it.value?.serverId == profile.serverId } ?: MutableLiveData(profile)
         }
@@ -407,7 +435,10 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
         thread {
             runOnThread(Dispatchers.Main){
                 val tmp = connectedUsers.value.toMutableList()
-                if(add) tmp.add(MutableLiveData(profile))
+                if(add) {
+                    profile.symbol = Symbol(profile.symbolCode,applicationContext)
+                    tmp.add(MutableLiveData(profile))
+                }
                 else tmp.removeIf { it.value?.serverId == profile.serverId }
                 connectedUsers.value = tmp
             }
@@ -421,10 +452,13 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
             Log.d("ServerVM", "Somehow there is not stored profile which changed")
             return
         }
-        liveProfile.postValue(profile.copy())
+        val cp = profile.copy()
+        cp.symbol = Symbol(profile.symbolCode,applicationContext)
+        liveProfile.postValue(cp)
     }
 
     override fun clientProfile(profile: UserProfile) {
+        Log.d("ServerVM","In user profile function ????????????????????????")
         userProfile = profile
        // TODO("Not yet implemented")
         //TODO firstly it will check if profile is client profile or someone else and then change things accordingly
@@ -516,6 +550,4 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
             }
         }
     }
-
-
 }

@@ -161,7 +161,7 @@ class AllPointsVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFiel
 
                 pickedPointsIds.forEach {
                     val point = dbHelper.getPoint(it)
-                    if(point?.online == true && (point.ownerId == "Me" || point.ownerId == "All") ) service?.deletePoint(point.serverId!!)
+                    if(point?.online == true && (point.ownerId == "Me" || point.ownerId == "All") ) service?.deletePoint(point.serverId)
                     dbHelper.getPoint(it)?.uris?.forEach {uri ->
                         ctx.contentResolver.delete(uri,null,null)
                     }

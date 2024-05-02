@@ -13,6 +13,7 @@ import com.example.jmb_bms.model.utils.sendNotification
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
+import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -25,12 +26,29 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.File
+import java.security.cert.X509Certificate
+import javax.net.ssl.X509TrustManager
 import kotlin.math.roundToInt
 
 
 class FileSharingRequests(val connectionService: ConnectionService, val comCentral: InnerCommunicationCentral) {
 
-    fun getClient() = HttpClient(Android)
+    fun getClient() = HttpClient(CIO){
+        engine{
+            https {
+                if(connectionService.testing)
+                {
+                    val trustAllCerts = object : X509TrustManager {
+                        override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                        override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                        override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+                    }
+                    Log.d("HERE","--------------------------------------------------------------------------------------")
+                    trustManager = trustAllCerts
+                }
+            }
+        }
+    }
 
     @OptIn(InternalAPI::class)
     suspend fun uploadFile(uri: Uri, pointData: Boolean, transactionId: String? = null): HttpResponse{
@@ -42,7 +60,7 @@ class FileSharingRequests(val connectionService: ConnectionService, val comCentr
 
         val client = getClient()
 
-        return client.post("http://${connectionService.serviceModel.host}:${connectionService.serviceModel.port}/upload") {
+        return client.post("https://${connectionService.serviceModel.host}:${connectionService.serviceModel.port}/upload") {
             headers {
                 append("SESSION", connectionService.serviceModel.profile.serverId)
             }
@@ -79,7 +97,7 @@ class FileSharingRequests(val connectionService: ConnectionService, val comCentr
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                getClient().prepareGet("http://${connectionService.serviceModel.host}:${connectionService.serviceModel.port}/download/$serverFileName"){
+                getClient().prepareGet("https://${connectionService.serviceModel.host}:${connectionService.serviceModel.port}/download/$serverFileName"){
                     headers{
                         append("SESSION", connectionService.serviceModel.profile.serverId)
                     }

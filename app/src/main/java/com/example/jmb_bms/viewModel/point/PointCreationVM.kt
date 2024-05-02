@@ -24,6 +24,7 @@ import com.example.jmb_bms.model.ServerEditingIconModel
 import com.example.jmb_bms.model.icons.SymbolCreationVMHelper
 import com.example.jmb_bms.model.database.points.PointDBHelper
 import com.example.jmb_bms.model.database.points.PointRow
+import com.example.jmb_bms.model.icons.Icon
 import com.example.jmb_bms.model.icons.Symbol
 import com.example.jmb_bms.model.utils.MimeTypes
 import com.example.jmb_bms.model.utils.PhotoContract
@@ -43,11 +44,13 @@ import java.util.concurrent.CopyOnWriteArrayList
 class PointCreationVM(
     @SuppressLint("StaticFieldLeak") val appCtx: Context,
     private val activityResultRegistry: ActivityResultRegistry,
-    private val dbHelper: PointDBHelper
-
+    private val dbHelper: PointDBHelper,
+    creating: Boolean
 ): ViewModel(), ServiceStateCallback {
 
-    constructor(id: Long, appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper) : this(appCtx, activityResultRegistry, dbHelper)
+    //constructor(appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper): this(appCtx, activityResultRegistry, dbHelper)
+
+    constructor(id: Long, appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper) : this(appCtx, activityResultRegistry, dbHelper, false)
     {
         runOnThread(Dispatchers.IO)
         {
@@ -62,7 +65,7 @@ class PointCreationVM(
         }
     }
 
-    constructor(locBundle: Bundle?, appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper) : this(appCtx, activityResultRegistry, dbHelper)
+    constructor(locBundle: Bundle?, appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper) : this(appCtx, activityResultRegistry, dbHelper, false)
     {
         runOnThread(Dispatchers.IO)
         {
@@ -97,10 +100,13 @@ class PointCreationVM(
 
         val pairs = this.row.uris?.map { Pair(it.toString(), getMediaType(it)) }
 
+        /*
         symbolCreationVMHelper.model.menuIdsString = row.menuString
         symbolCreationVMHelper.prepareMenuFromTheString(row.symbol,appCtx)
         symbolCreationVMHelper.model.symbol = Symbol(row.symbol,appCtx,"450")
         symbolCreationVMHelper.bitMap.postValue(symbolCreationVMHelper.model.symbol.imageBitmap)
+         */
+        setSymbol(row.symbol, row.menuString)
 
         runOnThread(Dispatchers.Main)
         {
@@ -181,8 +187,20 @@ class PointCreationVM(
             takeVideoLauncher = activityResultRegistry.register("takeVideo", VideoContract()){
                 storeNewFileUri(it)
             }
+
+            if(creating){
+                setSymbol("SPGP-----------","G|-")
+            }
             loading.postValue(false)
         }
+    }
+
+    private fun setSymbol(symbolString: String, menuString: String)
+    {
+        symbolCreationVMHelper.model.menuIdsString = menuString
+        symbolCreationVMHelper.prepareMenuFromTheString(symbolString,appCtx)
+        symbolCreationVMHelper.model.symbol = Symbol(symbolString,appCtx,"450")
+        symbolCreationVMHelper.bitMap.postValue(symbolCreationVMHelper.model.symbol.imageBitmap)
     }
 
     private fun getMediaType(uri: Uri): MimeTypes
@@ -507,7 +525,7 @@ class PointCreationVM(
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if( modelClass.isAssignableFrom(PointCreationVM::class.java) )
                     {
-                        return PointCreationVM(context, activityResultRegistry, dbHelper) as T
+                        return PointCreationVM(context, activityResultRegistry, dbHelper, true) as T
                     }
                     throw IllegalArgumentException("Unknown VM class")
                 }

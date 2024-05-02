@@ -42,7 +42,7 @@ class TeamActivity : ComponentActivity() {
         if(checkPermissions())
         {
             val currentLocation by viewModels<LiveLocationFromLoc> {
-                LiveLocationFromLoc.create(locationRepo)
+                LiveLocationFromLoc.create(locationRepo,this)
             }
 
             setContent {

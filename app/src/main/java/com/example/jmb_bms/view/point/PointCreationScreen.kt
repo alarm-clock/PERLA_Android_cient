@@ -1,5 +1,6 @@
 package com.example.jmb_bms.view.point
 
+import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -24,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -317,6 +319,7 @@ fun createPhotoInput(vm: PointCreationVM, scheme: MyColorPalette)
                 colors = menuItemColors
             )
             com.example.jmb_bms.view.Divider(scheme.onPrimary,0.2.dp)
+            /*
             DropdownMenuItem(
                 text = { Text("Add video", fontSize = 30.sp) },
                 onClick = {
@@ -324,7 +327,7 @@ fun createPhotoInput(vm: PointCreationVM, scheme: MyColorPalette)
                     vm.takeVideoFromCamera()
                 },
                 colors = menuItemColors
-            )
+            )*/
         }
     }
 }
@@ -457,6 +460,14 @@ fun PointCreationScaffold(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: 
     Scaffold(
         topBar = { MenuTop3(currTime, currLoc, vm.connectionState) },
         bottomBar = {
+
+            var rButtonText: String? = null
+
+            if(updating == false)
+            {
+                rButtonText = "CreatePoint"
+            }
+
             BottomBar1(
                 null,null, ButtonColors(Color.Red,Color.Red,Color.Red,Color.Red),{
                     if(updating == false)
@@ -478,18 +489,39 @@ fun PointCreationScaffold(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: 
                 CircularProgressIndicator(color = scheme.loading) //purple in light mode
             }
         } else {
-            Column(modifier = Modifier.padding(it).background(scheme.primary).verticalScroll(rememberScrollState())) {
+            Column(modifier = Modifier.padding(it).background(scheme.primary)/*.verticalScroll(rememberScrollState())*/) {
 
-                CreateIcon(vm,scheme)
-                Box(modifier = Modifier.size(5.dp))
-                NameAndDescription(vm,scheme)
-                PhotoInput(vm,photoDetail,scheme){uri ->
-                    val encodedUri = URLEncoder.encode(uri.toString(), "UTF-8")
+                Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                    CreateIcon(vm,scheme)
+                    Box(modifier = Modifier.size(5.dp))
+                    NameAndDescription(vm,scheme)
+                    PhotoInput(vm,photoDetail,scheme){uri ->
+                        val encodedUri = URLEncoder.encode(uri.toString(), "UTF-8")
 
-                    //TODO check this navhostcontroller
-                    navHostController?.navigate("${_PointScreens.VIDEO.route}/${encodedUri}")
+                        //TODO check this navhostcontroller
+                        navHostController?.navigate("${_PointScreens.VIDEO.route}/${encodedUri}")
+                    }
+                    OwnerPicker(vm,scheme)
+                    if(updating == false)
+                    {
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = bitmap != null,
+                            onClick = {
+                                vm.createPointOffline()
+                                backHandler()
+                            },
+                            colors = ButtonColors(
+                                scheme.enabledButton,
+                                scheme.onPrimary,
+                                scheme.disabledButton,
+                                if(isSystemInDarkTheme()) darkGrey20 else Color.White
+                            ),
+                            content = { Text("Create point offline", fontSize = 25.sp) },
+                            border = BorderStroke(1.dp,if(isSystemInDarkTheme()) scheme.onPrimary else Color.Transparent )
+                        )
+                    }
                 }
-                OwnerPicker(vm,scheme)
 
                 if(updating == true)
                 {
@@ -524,22 +556,6 @@ fun PointCreationScaffold(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: 
                         content = { Text("Create point online", fontSize = 32.sp) },
                         border = BorderStroke(1.dp,if(isSystemInDarkTheme()) scheme.onPrimary else Color.Transparent )
                     )
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = bitmap != null,
-                        onClick = {
-                            vm.createPointOffline()
-                            backHandler()
-                        },
-                        colors = ButtonColors(
-                            scheme.enabledButton,
-                            scheme.onPrimary,
-                            scheme.disabledButton,
-                            if(isSystemInDarkTheme()) darkGrey20 else Color.White
-                        ),
-                        content = { Text("Create point offline", fontSize = 25.sp) },
-                        border = BorderStroke(1.dp,if(isSystemInDarkTheme()) scheme.onPrimary else Color.Transparent )
-                    )
                 }
             }
         }
@@ -554,7 +570,6 @@ fun PointCreation( currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointCr
         PointCreationScaffold(currTime, currLoc, vm, navHostController, fromLoc, backHandler, photoDetail)
     }
 }
-
 @Composable
 fun AllPointScreens(
     point: Point,
@@ -597,10 +612,14 @@ fun AllPointScreens(
         composable(_PointScreens.DETAIL.route){
 
             val vm: PointDetailVM = viewModel( factory = PointDetailVM.create(point, dbHelper, ctx))
-            PointDetailWithTheme(currTime,currLoc,vm,{ navController.navigate(_PointScreens.CREATION.route + "/${vm.pointRow.id}")}, backHandler){ uri ->
+            PointDetailWithTheme(currTime,currLoc,vm,{ navController.navigate(_PointScreens.CREATION.route + "/${vm.pointRow.id}")}, backHandler){ holder ->
+                val encodedUri = URLEncoder.encode(holder.uri.toString(), "UTF-8")
 
-                val encodedUri = URLEncoder.encode(uri.toString(), "UTF-8")
-                navController.navigate("${_PointScreens.PHOTO.route}/${encodedUri}")
+                when(holder.mimeType){
+                    MimeTypes.IMAGE -> navController.navigate("${_PointScreens.PHOTO.route}/${encodedUri}")
+                    MimeTypes.VIDEO -> navController.navigate("${_PointScreens.VIDEO.route}/${encodedUri}")
+                    else -> Unit
+                }
             }
         }
         composable("${_PointScreens.DETAIL.route}/{id}/{toLoc}"){
@@ -612,9 +631,15 @@ fun AllPointScreens(
             PointDetailWithTheme(currTime,currLoc,vm,
                 {navController.navigate(_PointScreens.CREATION.route + "/$id")},
                 { if(toLoc) backHandler()  else navController.navigate(_PointScreens.ALL.route)}
-            ){ uri ->
-                val encodedUri = URLEncoder.encode(uri.toString(), "UTF-8")
-                navController.navigate("${_PointScreens.PHOTO.route}/${encodedUri}")
+            ){ holder ->
+                val encodedUri = URLEncoder.encode(holder.uri.toString(), "UTF-8")
+
+                when(holder.mimeType){
+                    MimeTypes.IMAGE -> navController.navigate("${_PointScreens.PHOTO.route}/${encodedUri}")
+                    MimeTypes.VIDEO -> navController.navigate("${_PointScreens.VIDEO.route}/${encodedUri}")
+                    else -> Unit
+                }
+
             }
         }
         composable(_PointScreens.CREATION_FROM_LOC.route)
@@ -677,9 +702,7 @@ fun AllPointScreens(
             if(uriString == null) navController.popBackStack()
             val uri = Uri.parse(uriString)
 
-            VideoPlay(currLoc,currTime, uri){
-                navController.popBackStack()
-            }
+            VideoPlay(uri)
         }
     }
 }

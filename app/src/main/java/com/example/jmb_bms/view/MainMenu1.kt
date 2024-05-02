@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -63,13 +64,13 @@ fun Divider ( color : Color, thicknessDp: Dp)
 fun ClasisMenu(menuItems: MenuItems, padding: PaddingValues, longestString: Int)
 {
     val scheme = LocalTheme.current
-    LazyColumn(modifier = Modifier.padding(padding)) {
+    LazyColumn(modifier = Modifier.padding(padding).fillMaxSize().background(scheme.primary)) {
         itemsIndexed(menuItems.items) { index: Int, menuItem: MenuItem ->
             Item(menuItem, longestString)
 
-            if (index < menuItems.items.lastIndex) {
+            //if (index < menuItems.items.lastIndex) {
                 Divider(scheme.onPrimary, 1.dp)
-            }
+            //}
         }
     }
 }
@@ -94,7 +95,7 @@ fun ReorderableMenu(menuItems: MenuItems, padding: PaddingValues, longestString:
 
     LazyColumn(
         state = state.listState,
-        modifier = Modifier.padding(padding).reorderable(state).detectReorderAfterLongPress(state)) {
+        modifier = Modifier.padding(padding).reorderable(state).detectReorderAfterLongPress(state).fillMaxSize().background(scheme.primary)) {
         items(data.value,{it.hardCodeID}) {menuItem: MenuItem ->
 
             ReorderableItem(state, key = menuItem.hardCodeID){ isDragging ->
@@ -135,7 +136,7 @@ fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocati
                 backButtonLogic){ enableReord = !enableReord} },
             topBar = {
                 MenuTop1(currTime,currLoc)
-            }
+            },
         ){ padding ->
 
             if(enableReord)

@@ -20,7 +20,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import coil.compose.rememberAsyncImagePainter
+import com.example.jmb_bms.model.utils.MimeTypes
+import com.example.jmb_bms.model.utils.PointDetailFileHolder
 import com.example.jmb_bms.model.utils.wgs84toMGRS
 import com.example.jmb_bms.ui.theme.LocalMenuItemsTheme
 import com.example.jmb_bms.ui.theme.LocalTextfieldTheme
@@ -89,7 +92,7 @@ fun DescriptionRow(vm: PointDetailVM)
 }
 
 @Composable
-fun DocumentsRow(vm: PointDetailVM, photoDetail: (uri: Uri) -> Unit)
+fun DocumentsRow(vm: PointDetailVM, photoDetail: (holder: PointDetailFileHolder) -> Unit)
 {
     val uris by vm.uris
 
@@ -105,12 +108,12 @@ fun DocumentsRow(vm: PointDetailVM, photoDetail: (uri: Uri) -> Unit)
 
                     Box(modifier = Modifier.size(200.dp))
                     {
-                        val _loading = remember { mutableStateOf(it.second != null) }
+                        val _loading = remember { mutableStateOf(it.loadingState != null) }
                         val loading by _loading
 
                         if(loading)
                         {
-                            val barVal by it.second!!.observeAsState()
+                            val barVal by it.loadingState!!.observeAsState()
                             if(barVal == null){
                                 _loading.value = false
                             }
@@ -120,11 +123,12 @@ fun DocumentsRow(vm: PointDetailVM, photoDetail: (uri: Uri) -> Unit)
                             }
                         } else
                         {
-                            val painter = rememberAsyncImagePainter(model = it.first)
+                            val painter = rememberAsyncImagePainter(model =
+                            if(it.mimeType == MimeTypes.IMAGE) it.uri else vm.thumbnails.find { pair -> pair.first == it.uri  }?.second)
                             Image(
                                 painter = painter,
                                 contentDescription = null,
-                                modifier = Modifier.padding(4.dp).size(190.dp).clickable { photoDetail(it.first) }
+                                modifier = Modifier.padding(4.dp).size(190.dp).clickable { photoDetail(it) }
                             )
                         }
                     }
@@ -184,7 +188,7 @@ fun PointExtraMenu(vm: PointDetailVM, expandedVM: MutableState<Boolean>, updateH
 
 
 @Composable
-fun PointDetail(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetailVM, rButtonHandler: () -> Unit , backHandler: () -> Unit, photoDetail: (uri: Uri) -> Unit)
+fun PointDetail(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetailVM, rButtonHandler: () -> Unit , backHandler: () -> Unit, photoDetail: (holder: PointDetailFileHolder) -> Unit)
 {
     val loading by vm.loading.observeAsState()
     val canUpdate by vm.canUpdate.observeAsState()
@@ -248,7 +252,7 @@ fun PointDetail(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetai
 
 
 @Composable
-fun PointDetailWithTheme(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetailVM, rButtonHandler: () -> Unit , backHandler: () -> Unit, photoDetail: (uri: Uri) -> Unit)
+fun PointDetailWithTheme(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetailVM, rButtonHandler: () -> Unit , backHandler: () -> Unit, photoDetail: (holder: PointDetailFileHolder) -> Unit)
 {
     TestTheme {
         PointDetail(currTime, currLoc, vm, rButtonHandler, backHandler, photoDetail)

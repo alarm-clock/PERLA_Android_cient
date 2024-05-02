@@ -63,7 +63,7 @@ class Symbol {
         editEnumsBasedOnString()
         somethingChanged = true
         try {
-            Log.d("Symbol","Invalid icon: $invalidIcon")
+            //Log.d("Symbol","Invalid icon: $invalidIcon")
             if(!invalidIcon) createIcon(context, size)
 
         } catch (_: Exception)

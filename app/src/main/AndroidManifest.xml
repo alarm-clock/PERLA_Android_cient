@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -23,7 +24,7 @@
             android:roundIcon="@mipmap/bms_working_icon_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.AppCompat"
-            tools:targetApi="31"
+            tools:targetApi="29"
             android:usesCleartextTraffic="true"
             android:windowSoftInputMode="adjustResize">
 
