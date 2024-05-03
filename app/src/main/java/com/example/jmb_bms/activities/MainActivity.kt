@@ -1,3 +1,8 @@
+/**
+ * @file: MainActivity.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing MainActivity class
+ */
 package com.example.jmb_bms.activities
 
 import android.content.ComponentName
@@ -23,6 +28,7 @@ import locus.api.android.objects.LocusVersion
 import locus.api.android.utils.IntentHelper
 import locus.api.android.utils.LocusUtils
 import locus.api.objects.extra.Location
+
 
 class MainActivity : ComponentActivity(){
 
