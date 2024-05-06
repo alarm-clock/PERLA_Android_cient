@@ -1,3 +1,8 @@
+/**
+ * @file: TeamRelatedDataModel.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing TeamRelatedDataModel class
+ */
 package com.example.jmb_bms.connectionService.models
 
 import android.content.Context
@@ -21,9 +26,13 @@ import locus.api.objects.geoData.Point
 import java.io.ByteArrayOutputStream
 import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
-import kotlin.collections.HashSet
-import kotlin.concurrent.thread
 
+/**
+ * Class that implements all team related methods for message parsing
+ * @param comCentral Used to invoke callbacks
+ * @param mainModel Main server model
+ * @param service Used to get session
+ */
 class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, private val mainModel: ConnectionDataAndState, val service: ConnectionService) {
 
 
@@ -33,6 +42,11 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
 
     val teams = CopyOnWriteArraySet<Pair<TeamProfile,CopyOnWriteArraySet<UserProfile>>>()
 
+    /**
+     * Method that finds all team members for given team
+     * @param teamId ID of team whose members are being found
+     * @return Set of member user profiles
+     */
     fun findUsersInSameTeam(teamId: String): CopyOnWriteArraySet<UserProfile>
     {
         val set = CopyOnWriteArraySet<UserProfile>()
@@ -57,6 +71,10 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
 
     fun checkIfTeamExists(teamId: String): Boolean = teams.find { it.first._id == teamId } != null
 
+    /**
+     * Method that creates team from message
+     * @param params Parsed JSON string
+     */
     fun createTeam(params: Map<String, Any?>)
     {
 
@@ -78,6 +96,10 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         logInfo("Added new team")
     }
 
+    /**
+     * Method that deletes team
+     * @param params Parsed JSON string
+     */
     fun deleteTeam(params: Map<String, Any?>)
     {
         logInfo("In deleteTeam function going to delete some team...")
@@ -100,6 +122,10 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         logInfo("Removed all teamEntries with deleted team in user profiles")
     }
 
+    /**
+     * Method that changes team leader
+     * @param params Parsed JSON message
+     */
     fun changeTeamLeader(params: Map<String, Any?>)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -134,6 +160,10 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
 
     }
 
+    /**
+     * Method that updates team data
+     * @param params Parsed JSON message
+     */
     fun updateTeam(params: Map<String, Any?>)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -151,6 +181,12 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
 
     }
 
+    /**
+     * Method that adds or removes team from user team entries
+     * @param id Team ID
+     * @param userProfile [UserProfile] in which team will be added or removed
+     * @param adding Flag that indicates if team will be added or removed
+     */
     private fun updateTeamEntry(id: String, userProfile: UserProfile,adding: Boolean)
     {
         if(adding)
@@ -167,12 +203,22 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         comCentral.sendUpdateTeammateList(id,userProfile,adding)
     }
 
+    /**
+     * Method that updates team entries for user profile
+     * @param newUserProfile User profile that will be updated
+     * @param add Flag that indicates if team will be added or removed
+     */
     fun manageTeamEntry(newUserProfile: UserProfile, add: Boolean)
     {
         newUserProfile.teamEntry.forEach {
             updateTeamEntry(it,newUserProfile,add)
         }
     }
+
+    /**
+     * Method that manages team entries from message
+     * @param params Parsed JSON string
+     */
     fun manageTeamEntry(params: Map<String, Any?>)
     {
         val id = params["_id"] as? String ?: return
@@ -184,6 +230,10 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         updateTeamEntry(id,userProfile,adding)
     }
 
+    /**
+     * Method that updates teams location
+     * @param params Parsed JSON string
+     */
     fun parseTeamLocUpdate(params: Map<String, Any?>)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -215,6 +265,11 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
 
     }
 
+    /**
+     * Method that sends team symbol on map
+     * @param teamProfile Profile of team that will be added
+     * @param ctx Context for symbol rendering
+     */
     private fun sendTeamPointToLocus(teamProfile: TeamProfile, ctx: Context)
     {
         val loc = teamProfile.teamLocation ?: return
@@ -230,6 +285,11 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         ActionDisplayPoints.sendPackSilent(ctx,packPoints,false)
     }
 
+    /**
+     * Method for removing team point from map
+     * @param teamId ID of team that will be removed
+     * @param ctx Used in Locus operation
+     */
     private fun removeTeamsPointFromLocus(teamId: String,ctx: Context)
     {
         val team = teams.find { it.first._id  ==  teamId }?.first ?: return
@@ -237,6 +297,11 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         team.teamLocation = null
     }
 
+    /**
+     * Method that starts location sharing job for team
+     * @param teamId ID of team on which behalf location will be sent
+     * @param delay Location refresh period
+     */
     fun startSharingLocationAsTeam(teamId: String, delay: RefreshVals)
     {
         val profile = teams.find { it.first._id == teamId }?.first ?: return
@@ -248,6 +313,10 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         comCentral.sendUpdatedTeamsProfile(profile)
     }
 
+    /**
+     * Method that stops sharing location on behalf of team
+     * @param teamId ID of team whose location sharing will be stopped
+     */
     fun stopSharingLocationAsTeam(teamId: String)
     {
         val profile = teams.find { it.first._id == teamId }?.first ?: return
@@ -261,6 +330,11 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         comCentral.sendUpdatedTeamsProfile(profile)
     }
 
+    /**
+     * Method that changes location sharing period for team
+     * @param teamId ID of team
+     * @param delay new value
+     */
     fun changeLocShDelay(teamId: String, delay: RefreshVals)
     {
         val profile = teams.find { it.first._id == teamId }?.first ?: return
@@ -271,6 +345,9 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
         comCentral.sendUpdatedTeamsProfile(profile)
     }
 
+    /**
+     * Method that resets instance
+     */
     fun clearTeams()
     {
         while ( teams.isNotEmpty())
@@ -281,8 +358,6 @@ class TeamRelatedDataModel(private val comCentral: InnerCommunicationCentral, pr
             comCentral.sendTeamsPairUpdate(team,false)
         }
     }
-
-
     private fun logInfo(string: String) { Log.d("TeamRelatedDataModel",string) }
 
 }

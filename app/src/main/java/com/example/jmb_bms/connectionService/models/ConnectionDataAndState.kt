@@ -1,3 +1,8 @@
+/**
+ * @file: ConnectionDataAndState.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing ConnectionDataAndState class
+ */
 package com.example.jmb_bms.connectionService.models
 
 import android.content.Context
@@ -24,6 +29,12 @@ import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 
+/**
+ * Class that serves as main service model and holds connection data and users
+ * @param service [ConnectionService]
+ * @param comCentral For invoking callbacks
+ * @constructor Initializes user information from shared preferences
+ */
 class ConnectionDataAndState(val service: ConnectionService, val comCentral: InnerCommunicationCentral) {
 
     private val context = service
@@ -93,7 +104,9 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         //val a = Collections.synchronizedList(listOfUsers)
     }
 
-    //maybe also remove their points :shrug:
+    /**
+     * Method that removes all users
+     */
     fun clearUsers()
     {
         while (listOfUsers.isNotEmpty())
@@ -102,6 +115,12 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
             listOfUsers.removeAndSend(profile)
         }
     }
+
+    /**
+     * Method that sends user point to Locus Map
+     * @param userProfile User profile whose location will be shown on map
+     * @param ctx CContext for symbol rendering
+     */
     private fun sendUserPointToLocus(userProfile: UserProfile, ctx: Context)
     {
         val loc = userProfile.location ?: return
@@ -126,6 +145,12 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         ActionDisplayPoints.removePackFromLocus(context,oldUsername)
         sendUserPointToLocus(storedProfile,context)
     }
+
+    /**
+     * Method that creates user from message
+     * @param params Parsed JSON string
+     * @param ctx Context for symbol rendering
+     */
     fun createUser(params: Map<String, Any?> , ctx: Context)
     {
 
@@ -158,12 +183,23 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         }
     }
 
+    /**
+     * Method that removes users point from locus
+     * @param userId ID of user whose point will be removed
+     * @param ctx Context for Locus method
+     */
     private fun removeUsersPointFromLocus(userId: String,ctx: Context)
     {
         val user = listOfUsers.find { it.serverId == userId } ?: return
         ActionDisplayPoints.removePackFromLocus(ctx, user.userName)
         user.location = null
     }
+
+    /**
+     * Method that parses location update
+     * @param params Parsed JSON string
+     * @param ctx Context for symbol rendering and Locus operation
+     */
     fun updateUsersLocation(params: Map<String, Any?> , ctx: Context)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -195,6 +231,12 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         }
 
     }
+
+    /**
+     * Method that deletes user from [listOfUsers] and removes his point from map
+     * @param userId ID of user that will be removed
+     * @param ctx Context for Locus method
+     */
     fun removeUserAndHisLocation(userId: String, ctx: Context)
     {
         Log.d("Service Model","Removing user with id: $userId")
@@ -206,12 +248,21 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         teamModel.manageTeamEntry(user,false)
     }
 
+    /**
+     * Method that removes users point from map
+     * @param userProfile [UserProfile] of user whose point will be removed
+     * @param ctx Context for locus method
+     */
     fun removePoint(userProfile: UserProfile, ctx: Context)
     {
         ActionDisplayPoints.removePackFromLocus(ctx,userProfile.userName)
     }
 
-    //TODO profile must also be live data so and should be updated as list itself
+    /**
+     * Method that updates user profile from message
+     * @param params Parsed JSON string
+     * @param ctx Context for Locus method
+     */
     fun changeUserProfile(params: Map<String, Any?>, ctx: Context)
     {
         val id = params["_id"] as? String
@@ -241,6 +292,10 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         comCentral.sendUpdateTeammateList(id,userProfile,adding)
     }
 
+    /**
+     * Method that starts or stops location sharing from message
+     * @param params Parsed JSON string
+     */
     suspend fun manageLocationShareStateTeamWide(params: Map<String, Any?>)
     {
         val teamId = params["_id"] as? String ?: return
@@ -249,11 +304,18 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         manageLocationShareState(on)
     }
 
+    /**
+     * Method that toggles location sharing for user
+     */
     suspend fun manageIndividualLocationShareChange()
     {
         manageLocationShareState(!sharingLocation)
     }
 
+    /**
+     * Method that starts or stops location sharing based on [on] flag
+     * @param on Flag indicating if location sharing will be turned on/off
+     */
     suspend fun manageLocationShareState(on:Boolean)
     {
         val periodStr = context.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).getString("Refresh_Val","5s") ?: "5s"
@@ -267,12 +329,20 @@ class ConnectionDataAndState(val service: ConnectionService, val comCentral: Inn
         }
     }
 
+    /**
+     * Extension method that adds user to list but also invokes callback for observer
+     * @param profile Profile that will be added
+     */
     private fun MutableList<UserProfile>.addAndSend(profile: UserProfile){
         this.add(profile)
         Log.d("DEBUG1",this.toString())
         comCentral.sendListUpdate(profile,true)
     }
 
+    /**
+     * Extension method that removes user from list but also invokes callback for observer
+     * @param profile Profile that will be removed
+     */
     private fun MutableList<UserProfile>.removeAndSend(profile: UserProfile)
     {
         this.remove(profile)

@@ -6,27 +6,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.More
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import com.example.jmb_bms.connectionService.ConnectionState
 import com.example.jmb_bms.ui.theme.LocalTheme
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 
 
 @Composable
-fun MenuTop4(currTime: LiveTime, currLoc: LiveLocationFromLoc, connectionState: LiveData<ConnectionState>, backButtonLogic: () -> Unit, optButtonLogic: () -> Unit)
+fun MenuTop4(currTime: LiveTime, currLoc: LiveLocationFromPhone, connectionState: LiveData<ConnectionState>, backButtonLogic: () -> Unit, optButtonLogic: () -> Unit)
 {
     val scheme = LocalTheme.current
     Column(modifier = Modifier.fillMaxWidth().background(scheme.primary))
@@ -41,7 +38,7 @@ fun MenuTop4(currTime: LiveTime, currLoc: LiveLocationFromLoc, connectionState: 
 
 
 @Composable
-fun MenuTop2(currTime: LiveTime, currLoc: LiveLocationFromLoc, backButtonLogic: () -> Unit, optButtonLogic: () -> Unit)
+fun MenuTop2(currTime: LiveTime, currLoc: LiveLocationFromPhone, backButtonLogic: () -> Unit, optButtonLogic: () -> Unit)
 {
     val scheme = LocalTheme.current
     Column(modifier = Modifier.background(scheme.primary)){

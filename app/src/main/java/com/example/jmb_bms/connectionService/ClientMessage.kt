@@ -1,3 +1,8 @@
+/**
+ * @file: ClientMessage.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing Client message object and methods for parsing JSON
+ */
 package com.example.jmb_bms.connectionService
 
 import android.content.Context
@@ -10,7 +15,9 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.*
 
-
+/**
+ * Object that implements methods that create JSON messages sent to server
+ */
 class ClientMessage {
 
     companion object{

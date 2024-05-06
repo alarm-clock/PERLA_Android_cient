@@ -1,3 +1,8 @@
+/**
+ * @file: ChatDBHelper.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing ChatDBHelper class
+ */
 package com.example.jmb_bms.model.database.chat
 
 import android.content.ContentValues
@@ -6,8 +11,14 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteCursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.jmb_bms.model.database.JSONListConverters
 import org.json.JSONArray
 
+/**
+ * Class that is used to do database queries for chats SQLite database. All chats are stored in this database
+ * @param context Context used to initialize [SQLiteOpenHelper]
+ * @param factory Custom [SQLiteDatabase.CursorFactory]
+ */
 class ChatDBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
     SQLiteOpenHelper(context, DB_NAME, factory, DB_VERSION)
 {
@@ -22,51 +33,42 @@ class ChatDBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
         db?.execSQL(q)
     }
 
-    private fun convertListToJson(list: List<Any>?): String?
-    {
-        if(list == null) return null
-
-        val convList = list.map { it.toString() }
-        val jsonArr = JSONArray(convList)
-        return jsonArr.toString()
-    }
-
-    private fun convertJsonToList(json: String?): List<String>?
-    {
-        if(json == null) return null
-        val jsonArr = JSONArray(json)
-
-        val list = mutableListOf<String>()
-
-        for(cnt in 0 until jsonArr.length())
-        {
-            list.add(jsonArr.getString(cnt))
-        }
-        return list
-    }
-
+    /**
+     * Method that inserts new chat room into table
+     * @param chatRow Chat room that will be inserted
+     */
     fun addChatRoom(chatRow: ChatRow)
     {
         val values = ContentValues().apply {
             put(ID_COL,chatRow.id)
             put(OWNER_COL, chatRow.owner)
             put(NAME_COL, chatRow.name)
-            put(MEMBERS_COL, convertListToJson(chatRow.members))
+            put(MEMBERS_COL, JSONListConverters.convertListToJson(chatRow.members))
         }
 
         writableDatabase.insert(TABLE_NAME,null,values)
     }
 
+    /**
+     * Method that initializes new [ChatRow] instance with values in row referenced by [cursor]
+     * @param cursor Cursor referencing row in table
+     * @return Initialized [ChatRow] instance
+     */
     private fun extractChatRow(cursor: Cursor): ChatRow
     {
         val id = cursor.getString(cursor.getColumnIndexOrThrow(ID_COL))
         val name = cursor.getString(cursor.getColumnIndexOrThrow(NAME_COL))
         val owner = cursor.getString(cursor.getColumnIndexOrThrow(OWNER_COL))
-        val members = convertJsonToList(cursor.getString(cursor.getColumnIndexOrThrow(MEMBERS_COL)))
+        val members = JSONListConverters.convertJsonToList(cursor.getString(cursor.getColumnIndexOrThrow(MEMBERS_COL)))
 
         return ChatRow(id,name,owner,members!!)
     }
 
+    /**
+     * Method that adds all [ChatRow]s into [target] list extracted from [cursor]
+     * @param cursor Cursor with table rows
+     * @param target [MutableList]<[ChatRow]> into which extracted rows will be added
+     */
     private fun extractAllRows(cursor: Cursor, target: MutableList<ChatRow>)
     {
         with(cursor)
@@ -78,6 +80,10 @@ class ChatDBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
         }
     }
 
+    /**
+     * Method that returns all chat rooms stored in DB
+     * @return [List]<[ChatRow]> with all chat rooms stored in DB or null if there is no chat stored
+     */
     fun getAllChatRooms(): List<ChatRow>?
     {
         val cursor = readableDatabase.query(
@@ -97,6 +103,11 @@ class ChatDBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
         return target
     }
 
+    /**
+     * Method that gets row from database with same [id]
+     * @param id ID of chat room
+     * @return [ChatRow] or null if no chat room with [id] exists
+     */
     fun getChatRoom(id: String): ChatRow?
     {
         val selection = "$ID_COL = ?"
@@ -117,10 +128,17 @@ class ChatDBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
         return res
     }
 
+    /**
+     * Method that removes all rows from table
+     */
     fun removeAllChatRooms(){
         writableDatabase.delete(TABLE_NAME,null,null)
     }
 
+    /**
+     * Method that removes chat room identified by [id] from table
+     * @param id ID of chat room that will be deleted
+     */
     fun removeChatRoom(id: String)
     {
         val selection = "$ID_COL = ?"
@@ -129,12 +147,16 @@ class ChatDBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
         writableDatabase.delete(TABLE_NAME,selection,args)
     }
 
+    /**
+     * Method that updates chat rooms database entry with values stored in [chatRow] and identified by [ChatRow.id] attribute.
+     * @param chatRow [ChatRow] instance with updated values
+     */
     fun updateChatRoom(chatRow: ChatRow)
     {
         val values = ContentValues().apply {
             put(NAME_COL, chatRow.name)
             put(OWNER_COL, chatRow.owner)
-            put(MEMBERS_COL, convertListToJson(chatRow.members))
+            put(MEMBERS_COL, JSONListConverters.convertListToJson(chatRow.members))
         }
         val selection = "$ID_COL = ?"
         val args = arrayOf(chatRow.id)

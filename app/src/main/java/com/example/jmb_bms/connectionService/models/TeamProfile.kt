@@ -1,3 +1,8 @@
+/**
+ * @file: TeamProfile.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing TeamProfile class
+ */
 package com.example.jmb_bms.connectionService.models
 
 import android.content.Context
@@ -8,7 +13,18 @@ import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.collections.HashSet
 
-
+/**
+ * Class that represents team profile
+ * @param _id Teams ID
+ * @param teamIcon Symbol code
+ * @param teamName Name
+ * @param teamLead UserID of leader
+ * @param appCtx Context for rendering
+ * @param teamLocation Teams location or if team isn't sharing location
+ * @param teamEntry NOT USED
+ * @param thisClientSharingLoc Flag that indicates if this client is sharing location on team behalf
+ * @param sharingLocDelay Location sharing period
+ */
 class TeamProfile(
     val _id: String,
     teamIcon: String,
@@ -33,6 +49,12 @@ class TeamProfile(
 
     companion object{
 
+        /**
+         * Method that creates team from [params]
+         * @param params Parsed JSON string
+         * @param appCtx Context for symbol rendering
+         * @return [TeamProfile] or null if error occurred
+         */
         fun createTeamProfileFromParams(params: Map<String, Any?>, appCtx: Context): TeamProfile?
         {
             val _id = params["_id"] as? String ?: return null

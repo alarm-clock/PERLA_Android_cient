@@ -1,7 +1,15 @@
+/**
+ * @file: MyColorPalette.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing MyColorPalette class
+ */
 package com.example.jmb_bms.model.utils
 
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Data class with custom color palette
+ */
 data class MyColorPalette(
     val primary: Color,
     val onPrimary: Color,

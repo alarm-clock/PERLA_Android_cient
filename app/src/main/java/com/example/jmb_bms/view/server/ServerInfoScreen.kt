@@ -2,7 +2,6 @@ package com.example.jmb_bms.view.server
 
 
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -17,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
 import com.example.jmb_bms.model.OpenableMenuItem
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.server.ServerInfoVM
 import androidx.compose.runtime.getValue
@@ -180,7 +179,7 @@ fun InputInfoScreen(serverInfoVM: ServerInfoVM, padding: PaddingValues, scheme: 
 }
 
 @Composable
-fun ServerInfoInputScreen(currTime: LiveTime, currLoc: LiveLocationFromLoc, serverInfoVM: ServerInfoVM, backHandler: () -> Unit, getToNextScreen: () -> Unit)
+fun ServerInfoInputScreen(currTime: LiveTime, currLoc: LiveLocationFromPhone, serverInfoVM: ServerInfoVM, backHandler: () -> Unit, getToNextScreen: () -> Unit)
 {
     val buttonsEnabled by serverInfoVM.everyThingEntered.observeAsState()
     val correct by serverInfoVM.everyThingCorrect.observeAsState()
@@ -231,7 +230,7 @@ fun ServerInfoInputScreen(currTime: LiveTime, currLoc: LiveLocationFromLoc, serv
 }
 
 @Composable
-fun ServerInfoInputScreenWithTheme(currTime: LiveTime, currLoc: LiveLocationFromLoc, serverInfoVM: ServerInfoVM, backHandler: () -> Unit, getToNextScreen: () -> Unit)
+fun ServerInfoInputScreenWithTheme(currTime: LiveTime, currLoc: LiveLocationFromPhone, serverInfoVM: ServerInfoVM, backHandler: () -> Unit, getToNextScreen: () -> Unit)
 {
     TestTheme {
         ServerInfoInputScreen(currTime, currLoc, serverInfoVM, backHandler, getToNextScreen)
@@ -240,7 +239,7 @@ fun ServerInfoInputScreenWithTheme(currTime: LiveTime, currLoc: LiveLocationFrom
 
 
 @Composable
-fun ServerService(currTime: LiveTime, currLoc: LiveLocationFromLoc, /*serverInfoVM: ServerInfoVM, serverVM: ServerVM,*/ backHandler: () -> Unit)
+fun ServerService(currTime: LiveTime, currLoc: LiveLocationFromPhone, /*serverInfoVM: ServerInfoVM, serverVM: ServerVM,*/ backHandler: () -> Unit)
 {
     val navController = rememberNavController()
     val shPref = LocalContext.current.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE)

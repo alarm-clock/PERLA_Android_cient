@@ -1,6 +1,5 @@
 package com.example.jmb_bms.view.point
 
-import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -25,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -43,7 +41,7 @@ import com.example.jmb_bms.ui.theme.*
 import com.example.jmb_bms.view.BottomBar1
 import com.example.jmb_bms.view.MenuTop3
 import com.example.jmb_bms.view.server.IconCreationCascade
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.point.AllPointsVM
 import com.example.jmb_bms.viewModel.point.PointCreationVM
@@ -449,7 +447,7 @@ fun NameAndDescription(vm: PointCreationVM,scheme: MyColorPalette)
 
 }
 @Composable
-fun PointCreationScaffold(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointCreationVM, navHostController: NavController? = null, fromLoc: Boolean, backHandler: () -> Unit, photoDetail: (uri: Uri) -> Unit)
+fun PointCreationScaffold(currTime: LiveTime, currLoc: LiveLocationFromPhone, vm: PointCreationVM, navHostController: NavController? = null, fromLoc: Boolean, backHandler: () -> Unit, photoDetail: (uri: Uri) -> Unit)
 {
     val bitmap by vm.symbolCreationVMHelper.bitMap.observeAsState()
     val loading by vm.loading.observeAsState()
@@ -458,7 +456,7 @@ fun PointCreationScaffold(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: 
     val scheme = LocalTheme.current
 
     Scaffold(
-        topBar = { MenuTop3(currTime, currLoc, vm.connectionState) },
+        topBar = { MenuTop3(currTime, currLoc, vm.liveServiceState.connectionState) },
         bottomBar = {
 
             var rButtonText: String? = null
@@ -564,7 +562,7 @@ fun PointCreationScaffold(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: 
 
 
 @Composable
-fun PointCreation( currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointCreationVM, navHostController: NavHostController? = null,fromLoc: Boolean,backHandler: () -> Unit, photoDetail: (uri: Uri) -> Unit )
+fun PointCreation(currTime: LiveTime, currLoc: LiveLocationFromPhone, vm: PointCreationVM, navHostController: NavHostController? = null, fromLoc: Boolean, backHandler: () -> Unit, photoDetail: (uri: Uri) -> Unit )
 {
     TestTheme{
         PointCreationScaffold(currTime, currLoc, vm, navHostController, fromLoc, backHandler, photoDetail)
@@ -574,7 +572,7 @@ fun PointCreation( currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointCr
 fun AllPointScreens(
     point: Point,
     currTime: LiveTime,
-    currLoc: LiveLocationFromLoc,
+    currLoc: LiveLocationFromPhone,
     activityResultRegistry: ActivityResultRegistry,
     dbHelper: PointDBHelper,
     screen: _PointScreens,

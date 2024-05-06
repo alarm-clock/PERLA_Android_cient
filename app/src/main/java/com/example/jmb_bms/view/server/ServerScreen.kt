@@ -29,7 +29,7 @@ import com.example.jmb_bms.model.TeamLiveDataHolder
 import com.example.jmb_bms.ui.theme.*
 import com.example.jmb_bms.view.BottomBar1
 import com.example.jmb_bms.view.MenuTop1
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.server.ServerVM
 
@@ -381,7 +381,7 @@ fun ServerScreenButtonsAndData(serverVM: ServerVM, padding: PaddingValues, navHo
 }
 
 @Composable
-fun ServerScreen(currLoc: LiveLocationFromLoc, currTime: LiveTime, serverVM: ServerVM, navHostController: NavHostController, backHandler: () -> Unit, changeScreen: () -> Unit)
+fun ServerScreen(currLoc: LiveLocationFromPhone, currTime: LiveTime, serverVM: ServerVM, navHostController: NavHostController, backHandler: () -> Unit, changeScreen: () -> Unit)
 {
    // val connectionState by serverVM.connectionState.observeAsState()
    // Log.d("ServerScreen", "Connection state is $connectionState")

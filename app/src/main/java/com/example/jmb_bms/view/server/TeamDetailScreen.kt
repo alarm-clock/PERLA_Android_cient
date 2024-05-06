@@ -22,7 +22,7 @@ import com.example.jmb_bms.model.utils.AddingScreenTuple
 import com.example.jmb_bms.ui.theme.*
 import com.example.jmb_bms.view.BottomBar1
 import com.example.jmb_bms.view.MenuTop1
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.server.ServerVM
 
@@ -310,7 +310,7 @@ fun TeamDataScreen(serverVM: ServerVM, screen: _Screens, paddingValues: PaddingV
 
 
 @Composable
-fun TeamDetailScreen(currLoc: LiveLocationFromLoc, currTime: LiveTime, serverVM: ServerVM, backHandler: () -> Unit)
+fun TeamDetailScreen(currLoc: LiveLocationFromPhone, currTime: LiveTime, serverVM: ServerVM, backHandler: () -> Unit)
 {
     val pickedTeam by serverVM.pickedTeam
     var screen by remember{ mutableStateOf(_Screens.NORMAL) }
@@ -387,7 +387,7 @@ fun TeamDetailScreen(currLoc: LiveLocationFromLoc, currTime: LiveTime, serverVM:
 }
 
 @Composable
-fun TeamDetailScreenWithTheme(currLoc: LiveLocationFromLoc, currTime: LiveTime, serverVM: ServerVM, backHandler: () -> Unit)
+fun TeamDetailScreenWithTheme(currLoc: LiveLocationFromPhone, currTime: LiveTime, serverVM: ServerVM, backHandler: () -> Unit)
 {
     TestTheme {
         TeamDetailScreen(currLoc, currTime, serverVM, backHandler)

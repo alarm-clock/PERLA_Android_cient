@@ -1,3 +1,8 @@
+/**
+ * @file: VideoContract.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing VideoContract class
+ */
 package com.example.jmb_bms.model.utils
 
 import android.app.Activity
@@ -12,6 +17,10 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Class that extends [ActivityResultContract] and starts video capture activity and later parses result from it. In the
+ * eye of user it simply creates file in which is video stored and returns its [Uri]
+ */
 class VideoContract : ActivityResultContract<Unit, Uri?>() {
 
     private lateinit var ctx: Context
@@ -46,6 +55,12 @@ class VideoContract : ActivityResultContract<Unit, Uri?>() {
         return null
     }
 
+    /**
+     * Method that renames temporary video file, sets [videoURI] with new value and grands permission to Locus to access it.
+     * During renaming process removes TMP_ prefix and changes suffix from .tmpvideo to actual captured video format
+     * @param mime File mime
+     * @return True on success otherwise false
+     */
     private fun renameFile(mime: String): Boolean
     {
         val oldFile = File(ctx.filesDir, name!!)
@@ -66,6 +81,10 @@ class VideoContract : ActivityResultContract<Unit, Uri?>() {
         return true
     }
 
+    /**
+     * Method that gets video format from file
+     * @return Mime type
+     */
     private fun getVideoFormat(): String {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(ctx, videoURI)
@@ -74,6 +93,11 @@ class VideoContract : ActivityResultContract<Unit, Uri?>() {
         return mimeType ?: "unknown"
     }
 
+    /**
+     * Method that creates temporary video file
+     * @param context Context that is used for creating file
+     * @return Temporary video file
+     */
     private fun createVideoFile(context: Context): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDirectory = context.filesDir

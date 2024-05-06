@@ -1,8 +1,12 @@
+/**
+ * @file: Symbol.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing Symbol class
+ */
 package com.example.jmb_bms.model.icons
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import android.util.SparseArray
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -11,7 +15,15 @@ import armyc2.c2sd.renderer.SinglePointRenderer
 import armyc2.c2sd.renderer.utilities.MilStdAttributes
 import armyc2.c2sd.renderer.utilities.RendererSettings
 
-
+/**
+ * Class that holds all data and method required to create symbol. Every symbol is created from string code with
+ * length 15 characters. To understand what every character means you must learn how 2525 symbology works. Characters
+ * like coding scheme, affiliation, or icon code are stored in attributes that can be accessed directly. Some setters also
+ * have checks if compatible combination are used. After that point is rendered by invoking method [createIcon]. If
+ * symbol is not created from menu but from whole icon string then just use constructor tha takes symbol code as parameter
+ * and symbol will be rendered right away. Rendered symbol can be then accessed in [imageBitmap] attribute and its validity
+ * in [invalidIcon] attribute. Invalid icon is icon that can not be rendered.
+ */
 class Symbol {
 
     private var symbolCode: String = "---------------"
@@ -55,7 +67,13 @@ class Symbol {
     private var somethingChanged = false
     var invalidIcon = false
 
-
+    /**
+     * Constructor that renders symbol by invokes [createIcon] method right away. It also sets all attribute to represent
+     * rendered symbol. If rendering fails [invalidIcon] will be set to true
+     * @param symbolCode Code of symbol that will be rendered
+     * @param context Context used for rendering symbols
+     * @param size Symbols size, it must be string because lib takes it as a string
+     */
     constructor( symbolCode: String, context: Context, size: String = "150")
     {
         this.symbolCode = symbolCode
@@ -72,6 +90,13 @@ class Symbol {
         }
     }
 
+    /**
+     * Constructor that renders symbol from [SharedPreferences] It also sets all attribute to represent
+     * rendered symbol. If rendering fails [invalidIcon] will be set to true.
+     * @param shPref [SharedPreferences] where symbol code is stored under "jmb_bms_user_symbol" key
+     * @param context Context used for rendering symbol
+     * @param size Symbols size, it must be string because lib takes it as a string
+     */
     constructor( shPref: SharedPreferences, context: Context, size: String = "150")
     {
         this.symbolCode = shPref.getString("jmb_bms_user_symbol", "---------------").toString()
@@ -86,6 +111,10 @@ class Symbol {
             invalidIcon = true
         }
     }
+
+    /**
+     * Constructor that does not set anything and initializes instance by default value.
+     */
     constructor(context: Context)
     {
         invalidIcon = true
@@ -93,12 +122,22 @@ class Symbol {
         //createIcon(context)
     }
 
+    /**
+     * Method that removes '-' character from [string] and returns it
+     * @param string String from which all '-' characters will be removed
+     * @return String without '-' character
+     */
     private fun removeMinus(string: String): String
     {
         val regex = "-+".toRegex()
         return  string.replace(regex,"")
     }
 
+    /**
+     * Method that stores scheme and also checks if it is correct scheme
+     * @param string String with scheme
+     * @return True if scheme was stored and correct else false
+     */
     private fun checkAndStoreScheme(string: String): Boolean
     {
         val possibleVals = enumValues<CodingScheme>()
@@ -113,6 +152,11 @@ class Symbol {
         return false
     }
 
+    /**
+     * Method that stores affiliation and also checks if it is correct scheme
+     * @param string String with affiliation
+     * @return True if affiliation was stored and correct else false
+     */
     private fun checkAndStoretAffiliation(string: String): Boolean
     {
         val possibleVals = enumValues<Affiliation>()
@@ -127,6 +171,11 @@ class Symbol {
         return false
     }
 
+    /**
+     * Method that stores battle dimension or category and also checks if it is correct scheme
+     * @param string String with battle dimension or category
+     * @return True if battle dimension or category was stored and correct else false
+     */
     private fun checkAndStoreDimensionOrCathegory(string: String): Boolean
     {
         if(cScheme == CodingScheme.TACTICAL_GRAPH) {
@@ -152,6 +201,12 @@ class Symbol {
             return false
         }
     }
+
+    /**
+     * Method that stores status and also checks if it is correct scheme
+     * @param string String with status
+     * @return True if status was stored and correct else false
+     */
     private fun checkAndStoreStatus(string: String) : Boolean
     {
         if(string[3] == Status.PRESENT.character )
@@ -168,12 +223,27 @@ class Symbol {
     }
 
     //no way I can check that now
+    /**
+     * Method that only stores icon code
+     * @param string icon code
+     * @return true
+     */
     fun checkAndStoreIconCode(string: String ) : Boolean
     {
         iconCode = string
         return true
     }
+
+    /**
+     * Getter for symbol code
+     * @return String with symbol code
+     */
     fun getSymbolCode() = symbolCode
+
+    /**
+     * Method that initializes attributes from icon string and checks if [symbolCode] string is correct
+     *
+     */
     private fun editEnumsBasedOnString()
     {
         val workinCode = removeMinus(symbolCode)
@@ -231,6 +301,11 @@ class Symbol {
 
 
  */
+    /**
+     * Method that fills [string] with '-' characters until length of 15
+     * @param string String that will be filled
+     * @return [string] that has filled remaining length with '-' characters
+     */
     fun fillWithMinus( string: String) : String
     {
         val suffLen = 15 - string.length
@@ -242,6 +317,11 @@ class Symbol {
         return string + newSuffix
     }
 
+    /**
+     * Method that creates symbol code from stored attributes like [affiliation] or [dimension] and stores it in
+     * [symbolCode] attribute
+     * @return True if code was built else false, [invalidIcon] attribute is set to negation of returned value
+     */
     private fun constructCodeFromEnums() : Boolean
     {
         if(!checkDimensionAndScheme()) return false
@@ -262,7 +342,13 @@ class Symbol {
     }
 
 
-    //TODO refactor this function so it looks better and most importantly it checks for errors
+    /**
+     * Method that renders 2525 symbol from attributes stored in instance. Rendered image is returned and stored in
+     * [imageBitmap] parameter. Byproduct is also symbol code stored in [symbolCode] attribute.
+     * @param context Context for rendering symbol
+     * @param size Rendered symbol size (for example "150" or "25")
+     * @return [ImageBitmap] on success or null if symbol could not be rendered
+     */
     fun createIcon(context: Context, size: String) : ImageBitmap?
     {
         //if(invalidIcon && !somethingChanged) return null

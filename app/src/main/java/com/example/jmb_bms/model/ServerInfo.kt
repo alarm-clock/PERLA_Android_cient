@@ -1,3 +1,8 @@
+/**
+ * @file: ServerInfo.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing ServerInfo class
+ */
 package com.example.jmb_bms.model
 
 import android.content.Context
@@ -9,9 +14,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Class that is model for ServerInfo screen and holds all data user entered.
+ * @param context Context for rendering symbol
+ * @param shPref [SharedPreferences] that hold all stored data
+ * @constructor Initializes instance with values stored in [SharedPreferences]
+ */
 class ServerInfo(context: Context, private val shPref: SharedPreferences): SymbolModel {
 
     var ipV4: String = ""
+        /**
+         * Setter for [ipV4] that checks if attribute is empty and stores [value] in shared preferences
+         */
         set(value) {
             ipV4WasEntered = value != ""
             field = value
@@ -30,6 +44,9 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences): Symbo
     val port : Int get() = _port
 
     var portString: String = ""
+        /**
+         * Setter for [portString] that checks if attribute is empty and stores [value] in shared preferences and sets [_port] attribute
+         */
         set(value) {
             portWasEntered = value != ""
             if(portWasEntered)
@@ -38,7 +55,7 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences): Symbo
                     value.toInt()
                 } catch (_: Exception)
                 {
-                    -1
+                    -1 // invalid value
                 }
                 portWasEntered = _port != -1
 
@@ -57,6 +74,9 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences): Symbo
         private set
 
     var userName: String = ""
+        /**
+         * Setter for [userName] that checks if attribute is empty and stores [value] in shared preferences
+         */
         set(value) {
             userNameWasEntered = value != ""
             field = value
@@ -70,11 +90,22 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences): Symbo
     var userNameWasEntered: Boolean = false
         private set
 
+    /**
+     * Method that returns true if all values were entered
+     * @return True if all values were entered otherwise false
+     */
     override fun everyThingEntered() = (userNameWasEntered && portWasEntered && ipV4WasEntered && symbolIsValid())
 
+    /**
+     * Method that returns if rendered symbol is valid
+     * @return True if rendered symbol is valid otherwise false
+     */
     override fun symbolIsValid() = (symbol.imageBitmap != null) //&& !symbol.invalidIcon
 
     override var symbolString = ""
+        /**
+         * Setter for [symbolString] that stores [value] in shared preferences
+         */
         set(value)
         {
             shPref.editPreferences { editor ->
@@ -87,6 +118,9 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences): Symbo
     override var symbol : Symbol
 
     override var menuIdsString = ""
+        /**
+         * Setter for [menuIdsString] that stores [value] in shared preferences
+         */
         set(value) {
             shPref.editPreferences {editor ->
                 editor.putString("ServerInfo_IconMenuLists",value)
@@ -115,6 +149,11 @@ class ServerInfo(context: Context, private val shPref: SharedPreferences): Symbo
         symbol.createIcon(context,"250")
 
     }
+
+    /**
+     * Extension method for [SharedPreferences] that does [operation] in IO coroutine scope
+     * @param operation Closure with commands that happen inside shared preferences
+     */
     private fun SharedPreferences.editPreferences(operation: (SharedPreferences.Editor) -> Unit)
     {
         val scope = CoroutineScope(Dispatchers.IO)

@@ -1,3 +1,8 @@
+/**
+ * @file: PeriodicPositionUpdater.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing PeriodicPositionUpdater class
+ */
 package com.example.jmb_bms.connectionService
 
 import android.Manifest
@@ -14,6 +19,16 @@ import com.google.android.gms.location.Priority
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
 
+/**
+ * Class that periodically on IO coroutine scope retrieves users location and sends it to server.
+ * @param delay Period of one retrieval cycle
+ * @param ctx Context used to get FusedLocationProviderClient instance
+ * @param session Active websocket session where location updates will be sent
+ * @param startAtInit Flag that indicates if location updating should start right away
+ * @param teamId teamID used to tag location updated if location update is sent on teams behalf
+ * @param userLoc Flag indicating if location is sent on clients behalf of teams behalf
+ * @constructor starts location sharing job if [startAtInit] flag is set to true
+ */
 class PeriodicPositionUpdater(private var delay: Long,
                               val ctx: Context, var session: DefaultWebSocketSession,
                               startAtInit: Boolean = false,val teamId: String? = null,val userLoc: Boolean = true) {
@@ -26,6 +41,10 @@ class PeriodicPositionUpdater(private var delay: Long,
     init {
         if (startAtInit) launchJob()
     }
+
+    /**
+     *  Method that launches location sharing job that will send location updates to server in [delay] long cycles
+     */
     private fun launchJob()
     {
         //TODO maybe check if session is still active
@@ -69,22 +88,16 @@ class PeriodicPositionUpdater(private var delay: Long,
                         {
                             Log.d("Periodic position updater","experienced exception while sending location ${e.message}")
                         }
-
                     }
                 }
-
-                //val loc = task.await()
             }
-            /*
-            LocationRepo(ctx,delay,false).getLocUpdates().collect{ update ->
-                Log.d("Periodic Pos Updater","Sending location update $update")
-                if(userLoc)  session.send(ClientMessage.locationUpdate(update))
-                else session.send(ClientMessage.teamLocationUpdate(teamId!!,update))
-            }
-
-             */
         }
     }
+
+    /**
+     * Method that stops updates [delay] attribute to [delay].
+     * @param delay New delay
+     */
     fun changeDelay(delay: Long)
     {
         if(this.delay == delay) return
@@ -95,6 +108,11 @@ class PeriodicPositionUpdater(private var delay: Long,
             launchJob()
         }
     }
+
+    /**
+     * Method that starts location sharing if no location sharing job is running.
+     * @param delay new delay. Leave empty to use same delay as before
+     */
     fun startSharingLocation(delay: Long = this.delay)
     {
         Log.d("Periodic Pos Updater","In start sharing location... Is job active? ${job.isActive}")
@@ -106,6 +124,10 @@ class PeriodicPositionUpdater(private var delay: Long,
         this.delay = delay
         launchJob()
     }
+
+    /**
+     * Method that stops location sharing job
+     */
     fun stopSharingLoc()
     {
         run = false

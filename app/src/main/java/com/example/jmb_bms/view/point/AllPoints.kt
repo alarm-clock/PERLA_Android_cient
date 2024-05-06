@@ -1,6 +1,5 @@
 package com.example.jmb_bms.view.point
 
-import android.content.Context
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,9 +24,8 @@ import com.example.jmb_bms.ui.theme.LocalMenuItemsTheme
 import com.example.jmb_bms.ui.theme.LocalTheme
 import com.example.jmb_bms.ui.theme.TestTheme
 import com.example.jmb_bms.view.BottomBar1
-import com.example.jmb_bms.view.MenuTop1
 import com.example.jmb_bms.view.MenuTop3
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.point.AllPointsVM
 
@@ -329,7 +327,7 @@ fun PickingDropdownMenu(vm: AllPointsVM, exp: MutableState<Boolean>)
 
 
 @Composable
-fun AllPoints(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: AllPointsVM, navController: NavController ,backHandler: () -> Unit)
+fun AllPoints(currTime: LiveTime, currLoc: LiveLocationFromPhone, vm: AllPointsVM, navController: NavController, backHandler: () -> Unit)
 {
 
     val shownPoints by vm.shownPoints.collectAsState()
@@ -343,7 +341,7 @@ fun AllPoints(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: AllPointsVM,
     val scheme = LocalTheme.current
 
     Scaffold(
-        topBar = { MenuTop3(currTime,currLoc,vm.connectionState) },
+        topBar = { MenuTop3(currTime,currLoc,vm.liveConnectionState.connectionState) },
         bottomBar = {
             BottomBar1(
                 if(shownPoints != null) "Pick Multiple" else null,
@@ -391,7 +389,7 @@ fun AllPoints(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: AllPointsVM,
 }
 
 @Composable
-fun AllPointsWithTheme(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: AllPointsVM, navController: NavController ,backHandler: () -> Unit)
+fun AllPointsWithTheme(currTime: LiveTime, currLoc: LiveLocationFromPhone, vm: AllPointsVM, navController: NavController, backHandler: () -> Unit)
 {
     TestTheme {
         AllPoints(currTime, currLoc, vm, navController, backHandler)

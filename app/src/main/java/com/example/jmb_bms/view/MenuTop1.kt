@@ -1,22 +1,13 @@
 package com.example.jmb_bms.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -24,11 +15,11 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jmb_bms.ui.theme.LocalTheme
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 
 @Composable
-fun TimeAndLoc(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc, fontSizeUp: TextUnit, fontSizeDown: TextUnit)
+fun TimeAndLoc(currTimeVM: LiveTime, currLocVM: LiveLocationFromPhone, fontSizeUp: TextUnit, fontSizeDown: TextUnit)
 {
     val currTime by currTimeVM.currentTime.observeAsState("")
     val currLoc by currLocVM.currLocation.observeAsState("")
@@ -49,7 +40,7 @@ fun TimeAndLoc(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc, fontSizeUp:
 }
 
 @Composable
-fun MenuTop1(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc)
+fun MenuTop1(currTimeVM: LiveTime, currLocVM: LiveLocationFromPhone)
 {
 
     val scheme = LocalTheme.current

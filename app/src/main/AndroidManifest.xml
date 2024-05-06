@@ -65,7 +65,7 @@
         <activity android:name=".activities.ChatActivity"/>
         <activity android:name=".activities.TeamActivity"/>
         <activity android:name=".activities.ClearSharedPrefDebug"/>
-        <activity android:name=".activities.DummyActivity" android:exported="true"></activity>
+        <activity android:name=".activities.SetAllPointsOnMapActivity" android:exported="true"></activity>
         <activity android:name=".activities.GetLocFromLocActivity" android:exported="true">
             <intent-filter>
                 <action android:name="locus.api.android.ACTION_RECEIVE_LOCATION"/>

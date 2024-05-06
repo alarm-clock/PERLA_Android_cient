@@ -1,17 +1,23 @@
+/**
+ * @file: ChatActivity.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing ChatActivity class
+ */
 package com.example.jmb_bms.activities
 
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.core.view.WindowCompat
 import com.example.jmb_bms.model.LocationRepo
 import com.example.jmb_bms.view.chat.ChatNavigation
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 
+/**
+ * Activity which sets chat related screens. It extends ComponentActivity class.
+ */
 class ChatActivity: ComponentActivity() {
 
     private val currentTime by viewModels<LiveTime>()
@@ -22,12 +28,13 @@ class ChatActivity: ComponentActivity() {
 
         locationRepo = LocationRepo(applicationContext)
 
-        val currentLocation by viewModels<LiveLocationFromLoc> {
-            LiveLocationFromLoc.create(locationRepo, this)
+        val currentLocation by viewModels<LiveLocationFromPhone> {
+            LiveLocationFromPhone.create(locationRepo, this)
         }
 
         //window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
 
+        //this unsets screen boundaries so when keyboard is shown on screen top bar won't be out of view
         WindowCompat.setDecorFitsSystemWindows(window,false)
 
         setContent {

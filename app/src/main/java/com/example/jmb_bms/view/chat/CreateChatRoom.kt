@@ -16,12 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.jmb_bms.connectionService.models.UserProfile
 import com.example.jmb_bms.ui.theme.*
 import com.example.jmb_bms.view.BottomBar1
 import com.example.jmb_bms.view.MenuTop3
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.chat.CreateChatRoomVM
 
@@ -118,7 +117,7 @@ fun AllUsersList(vm: CreateChatRoomVM)
 }
 
 @Composable
-fun CreateChatRoom(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: CreateChatRoomVM,navHostController: NavController)
+fun CreateChatRoom(currTime: LiveTime, currLoc: LiveLocationFromPhone, vm: CreateChatRoomVM, navHostController: NavController)
 {
     TestTheme {
         val scheme = LocalTheme.current

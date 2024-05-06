@@ -2,7 +2,6 @@ package com.example.jmb_bms.view.point
 
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -12,8 +11,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
-import com.example.jmb_bms.viewModel.LiveTime
 
 @Composable
 fun VideoPlay( uri: Uri)

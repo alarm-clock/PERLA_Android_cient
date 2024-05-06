@@ -1,3 +1,8 @@
+/**
+ * @file: AllChatsVM.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing AllChatsVM class
+ */
 package com.example.jmb_bms.viewModel.chat
 
 import android.content.Context
@@ -16,6 +21,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * ViewModel for chats screen that holds all data and implements all necessary methods required by chat feature
+ * @param appCtx Application context for symbol rendering and binding to service.
+ */
 class AllChatsVM(appCtx: Context) : ViewModel() {
 
     val mainAreaLoading = MutableLiveData(false)
@@ -27,6 +36,11 @@ class AllChatsVM(appCtx: Context) : ViewModel() {
     private val serviceBinder = ServiceBinder(appCtx, listOf(liveServiceState, liveChatRooms))
 
     private var secondTime = false
+
+    /**
+     * Method that creates [ChatMessage] instance and sends it to server
+     * @param message Message that will be sent
+     */
     fun sendMessage(message: String)
     {
         viewModelScope.launch(Dispatchers.IO)
@@ -39,8 +53,14 @@ class AllChatsVM(appCtx: Context) : ViewModel() {
         }
     }
 
+    /**
+     * Method that sends fetch message to get older messages from server
+     */
     fun fetchMessages()
     {
+        //this is here because this would be sent first time screen is drawn, but it is not required because service
+        //is already fetching messages
+        // so first time it is ignored
         if(secondTime)
         {
             viewModelScope.launch(Dispatchers.IO){
@@ -51,6 +71,10 @@ class AllChatsVM(appCtx: Context) : ViewModel() {
         } else secondTime = true
     }
 
+    /**
+     * Method that returns if user is owner of picked chat room
+     * @return True if user is owner otherwise false
+     */
     fun userIsOwner(): Boolean
     {
         val id = serviceBinder.service?.getUserId()
@@ -68,6 +92,9 @@ class AllChatsVM(appCtx: Context) : ViewModel() {
         }
     }
 
+    /**
+     * Method that sends delete room message to server
+     */
     fun deleteRoom()
     {
         viewModelScope.launch(Dispatchers.IO) {
@@ -86,6 +113,11 @@ class AllChatsVM(appCtx: Context) : ViewModel() {
     }
 
     companion object{
+
+        /**
+         * Static method that creates custom vm factory for [AllChatsVM] viewModel with custom parameters.
+         * @param context  Application context for symbol rendering and binding to service.
+         */
         fun create(context: Context): ViewModelProvider.Factory{
 
             return object : ViewModelProvider.Factory{

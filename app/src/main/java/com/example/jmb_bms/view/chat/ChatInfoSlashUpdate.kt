@@ -1,6 +1,5 @@
 package com.example.jmb_bms.view.chat
 
-import android.provider.ContactsContract.Profile
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,15 +9,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.jmb_bms.ui.theme.LocalTheme
 import com.example.jmb_bms.ui.theme.TestTheme
 import com.example.jmb_bms.view.BottomBar1
 import com.example.jmb_bms.view.MenuTop3
-import com.example.jmb_bms.view.server.UserRow
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
-import com.example.jmb_bms.viewModel.chat.AllChatsVM
 import com.example.jmb_bms.viewModel.chat.ChatRoomDetailVM
 import com.example.jmb_bms.viewModel.chat.ChatRoomUsersVM
 
@@ -75,7 +71,7 @@ fun PrintAllOtherUsers(vm: ChatRoomUsersVM)
 }
 
 @Composable
-fun ChatInfoUpdate(currLoc: LiveLocationFromLoc, currTime: LiveTime, vm: ChatRoomUsersVM, backHandler: () -> Unit)
+fun ChatInfoUpdate(currLoc: LiveLocationFromPhone, currTime: LiveTime, vm: ChatRoomUsersVM, backHandler: () -> Unit)
 {
     TestTheme {
         val theme = LocalTheme.current
@@ -103,7 +99,7 @@ fun ChatInfoUpdate(currLoc: LiveLocationFromLoc, currTime: LiveTime, vm: ChatRoo
 }
 
 @Composable
-fun ChatRoomInfo(currLoc: LiveLocationFromLoc, currTime: LiveTime, vm: ChatRoomDetailVM, backHandler: () -> Unit)
+fun ChatRoomInfo(currLoc: LiveLocationFromPhone, currTime: LiveTime, vm: ChatRoomDetailVM, backHandler: () -> Unit)
 {
     TestTheme {
         val room by vm.livePickedRoomDetail.pickedRoom.collectAsState()

@@ -1,9 +1,13 @@
+/**
+ * @file: LiveUsers.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing LiveUsers class
+ */
 package com.example.jmb_bms.model
 
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.example.jmb_bms.connectionService.in_app_communication.LiveUsersCallback
 import com.example.jmb_bms.connectionService.models.UserProfile
 import com.example.jmb_bms.model.icons.Symbol
@@ -11,9 +15,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.concurrent.thread
 
+/**
+ * Class that servers as model holding live user profiles in list and observers service
+ * @param ctx Application context for symbol rendering
+ */
 class LiveUsers(val ctx: Context): LiveUsersCallback {
 
     val connectedUsers = MutableStateFlow(listOf<MutableLiveData<UserProfile>>())
@@ -23,6 +29,7 @@ class LiveUsers(val ctx: Context): LiveUsersCallback {
         newList.forEach {
             it.symbol = Symbol(it.symbolCode,ctx)
         }
+        //if there already is live profile use that and don't create new
         val list = newList.map { profile ->
             connectedUsers.value.find { it.value?.serverId == profile.serverId } ?: MutableLiveData(profile)
         }
@@ -58,6 +65,9 @@ class LiveUsers(val ctx: Context): LiveUsersCallback {
         liveProfile.postValue(profile.copy())
     }
 
+    /**
+     * Method that nullifies all symbols just ot be sure
+     */
     fun onDestroy()
     {
         connectedUsers.value.map { it.value }.forEach {

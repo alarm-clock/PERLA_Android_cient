@@ -1,31 +1,41 @@
+/**
+ * @file: MenuListsHelper.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing MenuListsHelper class
+ */
 package com.example.jmb_bms.model.menu
 
 import com.example.jmb_bms.model.OpenableMenuItem
 import com.example.jmb_bms.model.icons.*
 
+/**
+ * Class that holds point creation menus and dynamically creates them on demand to not use whole system memory.
+ * Not all methods are commented because they mostly only hold list with strings from which menu will be created.
+ * How it all work is quite simple, Every submenu has its own code. When users picks some element in menu [getList]
+ * method is called with level on which menu is and with picked code. Based on those parameters correct level method
+ * is called that based on code returns menu that will be showed to user. If from given element symbol can be created
+ * then it also has closure that is called that renders symbol.
+ */
 class MenuListsHelper {
+    /*
+    * What was hard lesson I learned while writing this class. DO NOT USE LARGE ENUMS IN KOTLIN, ESPECIALLY IF THEY HOLD STRING OR SOMETHING.
+    * ENUM CLASS NEEDS TWICE AS MUCH MEMORY AS REGULAR CLASS. COMBINE IT WITH 1400 SYMBOLS AND CREATE LISTS BY TRAVERSING
+    * THROUGH WHOLE ENUM USING .entries AND YOUR RAM IS EATEN ALIVE. FOR SOME F****** REASON IT LOADS ALL ENUM ELEMENTS INTO MEMORY
+    * ,EVEN BEFORE ANY CALL TO .entries IS REACHED, AND COMMITS SEPPUKU. READER, PLEASE DO NOT USE ENUM UNLESS ITS LIKE 10 ENTRIES
+    * OTHERWISE YOU ARE TAKING MEMORY AWAY FROM YOUR STARVING CLASS INSTANCES THAT HAVE BRIGHT FUTURE AHEAD
+    */
 
-    /*private inline fun createBottomGroundList(list: List<GroundIcon>): List<OpenableMenuItem>
-    {
-        return list.map {
-            OpenableMenuItem(it.iconCode,it.toString(),null,it){vm, context -> vm.finishCreatingSymbol(it,context)}
-        }
-    }
-    
+    /**
+     * Method that creates "Bottom" level list with entries from which symbol can be created
+     * @param list [List]<[IconTuple]> with all tuples that are used given menu
+     * @return [List]<[OpenableMenuItem]> created from [list]
      */
-
-    private inline fun  createBottomList(list: List<IconTuple>): List<OpenableMenuItem>
+    private fun  createBottomList(list: List<IconTuple>): List<OpenableMenuItem>
     {
         return list.map {
             OpenableMenuItem(it.iconCode,it.iconName,null,it){vm ,context -> vm.finishCreatingSymbol(it ,context)}
         }
     }
-
-    /*
-    private val spaceList = SpaceSymbols.entries.map { item ->
-        OpenableMenuItem(item.iconCode,item.toString(),null,item){ vm: SymbolCreationVMHelper ,context -> vm.finishCreatingSymbol(item,context) }
-    }
-     */
 
     private val spaceList = createBottomList(listOf(
         IconTuple(IconMenuName.SPACE_TRACK, Icon.SPACE_TRACK),
@@ -1068,8 +1078,11 @@ class MenuListsHelper {
     }
 
 
-
-
+    /**
+     * Method that gets level 1 lists based on [id]. Level 0 is basically battlefield dimension.
+     * @param id Picked submenu id
+     * @return [List]<[OpenableMenuItem]> with all elements of picked submenu or null if known code or level is passed
+     */
     private fun getLvl0Lists(id: String) : List<OpenableMenuItem>?
     {
         return when(id) {
@@ -1085,6 +1098,11 @@ class MenuListsHelper {
         }
     }
 
+    /**
+     * Method that gets level 2 lists based on [id].
+     * @param id Picked submenu id
+     * @return [List]<[OpenableMenuItem]> with all elements of picked submenu or null if known code or level is passed
+     */
     private fun getLvl1Lists(id: String) : List<OpenableMenuItem>?
     {
         return when(id){
@@ -1106,6 +1124,12 @@ class MenuListsHelper {
             else -> null
         }
     }
+
+    /**
+     * Method that gets level 3 lists based on [id].
+     * @param id Picked submenu id
+     * @return [List]<[OpenableMenuItem]> with all elements of picked submenu or null if known code or level is passed
+     */
     private fun getLvl2Lists(id: String) : List<OpenableMenuItem>?
     {
         return when(id)
@@ -1129,6 +1153,11 @@ class MenuListsHelper {
         }
     }
 
+    /**
+     * Method that gets level 4 lists based on [id].
+     * @param id Picked submenu id
+     * @return [List]<[OpenableMenuItem]> with all elements of picked submenu or null if known code or level is passed
+     */
     private fun getLvl3Lists(id: String): List<OpenableMenuItem>?
     {
         return when(id)
@@ -1143,6 +1172,12 @@ class MenuListsHelper {
         }
     }
 
+    /**
+     * Method that gets correct submenu based on [level] depth and submenus [id]
+     * @param id Submenu ID
+     * @param level Depth of submenu
+     * @return [List]<[OpenableMenuItem]> with all elements of submenu or null if known code or level is passed
+     */
     fun getList( id: String, level: Int) : List<OpenableMenuItem>?
     {
         return when(level)
@@ -1153,7 +1188,5 @@ class MenuListsHelper {
             3 -> getLvl3Lists(id)
             else -> return null
         }
-
     }
-
 }

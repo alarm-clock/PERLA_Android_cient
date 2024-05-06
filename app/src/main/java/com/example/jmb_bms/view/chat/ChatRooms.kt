@@ -32,13 +32,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.jmb_bms.connectionService.ConnectionState
-import com.example.jmb_bms.model.ChatInfo
-import com.example.jmb_bms.model.ChatInfoAndMsgHolder
 import com.example.jmb_bms.model.ChatMessage
 import com.example.jmb_bms.model.database.chat.ChatRow
 import com.example.jmb_bms.ui.theme.LocalTextfieldTheme
@@ -46,7 +43,7 @@ import com.example.jmb_bms.ui.theme.LocalTheme
 import com.example.jmb_bms.ui.theme.TestTheme
 import com.example.jmb_bms.ui.theme.darkCianColor
 import com.example.jmb_bms.view.MenuTop4
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.chat.AllChatsVM
 import com.example.jmb_bms.viewModel.chat.ChatRoomDetailVM
@@ -356,7 +353,7 @@ fun ChatRoomOptButton(vm: AllChatsVM, expanded: MutableState<Boolean>,navHostCon
 
 
 @Composable
-fun ChatRooms(currLoc: LiveLocationFromLoc, currTime: LiveTime, vm: AllChatsVM, navHostController: NavController, backHandler: () -> Unit)
+fun ChatRooms(currLoc: LiveLocationFromPhone, currTime: LiveTime, vm: AllChatsVM, navHostController: NavController, backHandler: () -> Unit)
 {
     TestTheme {
         Scaffold(
@@ -377,7 +374,7 @@ fun ChatRooms(currLoc: LiveLocationFromLoc, currTime: LiveTime, vm: AllChatsVM, 
 
 
 @Composable
-fun ChatNavigation(currLoc: LiveLocationFromLoc, currTime: LiveTime,backHandler: () -> Unit)
+fun ChatNavigation(currLoc: LiveLocationFromPhone, currTime: LiveTime, backHandler: () -> Unit)
 {
     val ctx = LocalContext.current.applicationContext
 

@@ -1,3 +1,4 @@
+
 package com.example.jmb_bms.model
 
 import android.content.Context
@@ -6,7 +7,6 @@ import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
 import com.example.jmb_bms.connectionService.in_app_communication.ChatRoomsCallBacks
 import com.example.jmb_bms.model.database.chat.ChatDBHelper
-import com.example.jmb_bms.model.database.chat.ChatRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

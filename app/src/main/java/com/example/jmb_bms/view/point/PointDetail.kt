@@ -1,6 +1,5 @@
 package com.example.jmb_bms.view.point
 
-import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,12 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import coil.compose.rememberAsyncImagePainter
 import com.example.jmb_bms.model.utils.MimeTypes
 import com.example.jmb_bms.model.utils.PointDetailFileHolder
@@ -31,9 +27,8 @@ import com.example.jmb_bms.ui.theme.LocalTheme
 import com.example.jmb_bms.ui.theme.TestTheme
 import com.example.jmb_bms.view.BottomBar1
 import com.example.jmb_bms.view.MenuTop1
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
-import com.example.jmb_bms.viewModel.point.PointCreationVM
 import com.example.jmb_bms.viewModel.point.PointDetailVM
 
 
@@ -188,7 +183,7 @@ fun PointExtraMenu(vm: PointDetailVM, expandedVM: MutableState<Boolean>, updateH
 
 
 @Composable
-fun PointDetail(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetailVM, rButtonHandler: () -> Unit , backHandler: () -> Unit, photoDetail: (holder: PointDetailFileHolder) -> Unit)
+fun PointDetail(currTime: LiveTime, currLoc: LiveLocationFromPhone, vm: PointDetailVM, rButtonHandler: () -> Unit, backHandler: () -> Unit, photoDetail: (holder: PointDetailFileHolder) -> Unit)
 {
     val loading by vm.loading.observeAsState()
     val canUpdate by vm.canUpdate.observeAsState()
@@ -252,7 +247,7 @@ fun PointDetail(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetai
 
 
 @Composable
-fun PointDetailWithTheme(currTime: LiveTime, currLoc: LiveLocationFromLoc, vm: PointDetailVM, rButtonHandler: () -> Unit , backHandler: () -> Unit, photoDetail: (holder: PointDetailFileHolder) -> Unit)
+fun PointDetailWithTheme(currTime: LiveTime, currLoc: LiveLocationFromPhone, vm: PointDetailVM, rButtonHandler: () -> Unit, backHandler: () -> Unit, photoDetail: (holder: PointDetailFileHolder) -> Unit)
 {
     TestTheme {
         PointDetail(currTime, currLoc, vm, rButtonHandler, backHandler, photoDetail)

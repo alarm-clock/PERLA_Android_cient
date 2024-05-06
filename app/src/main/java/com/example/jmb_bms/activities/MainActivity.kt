@@ -21,15 +21,20 @@ import com.example.jmb_bms.model.LocationRepo
 import com.example.jmb_bms.model.menu.MainMenuItems
 import com.example.jmb_bms.model.database.points.PointDBHelper
 import com.example.jmb_bms.view.mainMenu
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 
 import locus.api.android.objects.LocusVersion
 import locus.api.android.utils.IntentHelper
-import locus.api.android.utils.LocusUtils
 import locus.api.objects.extra.Location
 
 
+/**
+ * MainActivity
+ *
+ * This class hosts main activity of whole application. In short, it is main menu of  whole app.
+ * It extends ComponentActivity
+ */
 class MainActivity : ComponentActivity(){
 
 
@@ -42,17 +47,35 @@ class MainActivity : ComponentActivity(){
     private var service : ConnectionService? = null
 
     private val serviceConnection = object : ServiceConnection {
+
+        /**
+         * Method which is called when activity connects to service
+         *
+         * @param name Specifier of application component. Not used
+         * @param serviceBin Service binder
+         */
         override fun onServiceConnected(name: ComponentName?, serviceBin: IBinder?) {
             val binder = serviceBin as ConnectionService.LocalBinder
             service = binder.getService()
         }
 
+        /**
+         * Method which is called when activity disconnects from service
+         *
+         * @param name Specifier of application component. Not used
+         */
         override fun onServiceDisconnected(name: ComponentName?) {
             service = null
         }
     }
 
 
+    /**
+     *  Method called when activity created. Part of its life cycle. It prepares db helper and viewModels for time and location.
+     *  Then sets screen content.
+     *
+     *  @param savedInstanceState Previous instance state saved in bundle
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -68,8 +91,8 @@ class MainActivity : ComponentActivity(){
 
         locationRepo = LocationRepo(applicationContext)
 
-        val currentLocation by viewModels<LiveLocationFromLoc> {
-            LiveLocationFromLoc.create(locationRepo, this)
+        val currentLocation by viewModels<LiveLocationFromPhone> {
+            LiveLocationFromPhone.create(locationRepo, this)
         }
         menuItems = MainMenuItems(getSharedPreferences("jmb_bms_MainMenu", MODE_PRIVATE),this)
 
@@ -78,16 +101,16 @@ class MainActivity : ComponentActivity(){
             IntentHelper.handleIntentMainFunction(this,intent, object : IntentHelper.OnIntentReceived{
 
                 override fun onReceived(lv: LocusVersion, locGps: Location?, locMapCenter: Location?) {
-
+                    setContent {
+                        mainMenu(currentTime, currentLocation, menuItems){ finish() }
+                    }
                 }
-                override fun onFailed() {
-
-                }
+                override fun onFailed() {}
             })
         }
         else if( IntentHelper.isIntentPointTools(intent))
         {
-            val point = IntentHelper.getPointFromIntent(this,intent);
+            //val point = IntentHelper.getPointFromIntent(this,intent);
         }
         else if (IntentHelper.isIntentPointsTools(intent))
         {
@@ -98,12 +121,15 @@ class MainActivity : ComponentActivity(){
             setContent {
                 mainMenu(currentTime, currentLocation, menuItems){ finish() }
             }
-            //finish()
         }
     }
 
+    /**
+     * Function for binding to service if it is running
+     */
     fun bind()
     {
+        //service is already bound
         if(service != null) return
 
         val running = this.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).getBoolean("Service_Running",false)
@@ -112,16 +138,17 @@ class MainActivity : ComponentActivity(){
 
         Log.d("MainActivity", "Binding to service")
         val intent = Intent(this, ConnectionService::class.java).putExtra("Caller","CreatePoint")
-        //startForegroundService(intent)
         bindService(intent, serviceConnection, 0)
     }
 
+    /**
+     * Function for unbinding from service
+     */
     fun unbind()
     {
         if( service != null)
         {
             unbindService(serviceConnection)
-            //stopService(Intent(this, ConnectionService::class.java))
         }
         service = null
     }
@@ -129,7 +156,6 @@ class MainActivity : ComponentActivity(){
 
     override fun onStop() {
         super.onStop()
-   //     println("TeamScreen onStop: stopping bound is -> $bound")
         unbind()
     }
 

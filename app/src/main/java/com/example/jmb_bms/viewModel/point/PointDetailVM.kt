@@ -229,6 +229,7 @@ class PointDetailVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFi
                 appCtx.contentResolver.delete(it,null,null)
             }
         }
+        if(pointRow.online && (pointRow.ownerId == "Me" || pointRow.ownerId == "All")) service?.deletePoint(pointRow.serverId.toString())
     }
     override fun onOnServiceStateChanged(newState: ConnectionState) {
         if(newState == _connectionState.value) return

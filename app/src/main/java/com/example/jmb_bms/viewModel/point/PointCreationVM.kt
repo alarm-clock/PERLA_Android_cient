@@ -1,3 +1,8 @@
+/**
+ * @file: PointCreationVM.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing PointCreationVM class
+ */
 package com.example.jmb_bms.viewModel.point
 
 import android.annotation.SuppressLint
@@ -20,6 +25,7 @@ import com.example.jmb_bms.activities.GetLocFromLocActivity
 import com.example.jmb_bms.connectionService.ConnectionService
 import com.example.jmb_bms.connectionService.ConnectionState
 import com.example.jmb_bms.connectionService.in_app_communication.ServiceStateCallback
+import com.example.jmb_bms.model.LiveServiceState
 import com.example.jmb_bms.model.ServerEditingIconModel
 import com.example.jmb_bms.model.icons.SymbolCreationVMHelper
 import com.example.jmb_bms.model.database.points.PointDBHelper
@@ -30,6 +36,7 @@ import com.example.jmb_bms.model.utils.MimeTypes
 import com.example.jmb_bms.model.utils.PhotoContract
 import com.example.jmb_bms.model.utils.VideoContract
 import com.example.jmb_bms.model.utils.runOnThread
+import com.example.jmb_bms.viewModel.ServiceBinder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import locus.api.android.ActionBasics
@@ -41,15 +48,31 @@ import locus.api.objects.geoData.addAttachmentPhoto
 import locus.api.objects.geoData.parameterDescription
 import java.util.concurrent.CopyOnWriteArrayList
 
+/**
+ * VM that holds all data and methods required for creating and updating point.
+ * @param appCtx Application context for Locus methods, symbol rendering and starting other activities
+ * @param activityResultRegistry Result registry for registering callbacks that parses results from other activities like camera
+ * @param dbHelper DB helper for points database
+ * @constructor Registers result callbacks using [activityResultRegistry] and sets default symbol to [symbolCreationVMHelper]
+ */
 class PointCreationVM(
     @SuppressLint("StaticFieldLeak") val appCtx: Context,
     private val activityResultRegistry: ActivityResultRegistry,
     private val dbHelper: PointDBHelper,
     creating: Boolean
-): ViewModel(), ServiceStateCallback {
+): ViewModel() {
 
-    //constructor(appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper): this(appCtx, activityResultRegistry, dbHelper)
+    val liveServiceState = LiveServiceState()
+    private val serviceBinder = ServiceBinder(appCtx, listOf(liveServiceState))
 
+    /**
+     * Secondary constructor that takes points [id] and finds it database. After that initializes itself with values from
+     * obtained pointRow. This constructor is used for point updating.
+     * @param id ID of point that will be updated
+     * @param appCtx Application context for Locus methods, symbol rendering and starting other activities
+     * @param activityResultRegistry Result registry for registering callbacks that parses results from other activities like camera
+     * @param dbHelper DB helper for points database
+     */
     constructor(id: Long, appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper) : this(appCtx, activityResultRegistry, dbHelper, false)
     {
         runOnThread(Dispatchers.IO)
@@ -60,11 +83,19 @@ class PointCreationVM(
 
             initFromRow(row)
 
-            bind()
+           // bind()
             loading.postValue(false)
         }
     }
 
+    /**
+     * Secondary constructor used when points location is updated and that Location is received from Locus. Firstly it initializes
+     * from spacial table in database (stores own state in there) and then updates points location from [locBundle].
+     * @param locBundle Bundle with new location
+     * @param appCtx Application context for Locus methods, symbol rendering and starting other activities
+     * @param activityResultRegistry Result registry for registering callbacks that parses results from other activities like camera
+     * @param dbHelper DB helper for points database
+     */
     constructor(locBundle: Bundle?, appCtx: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper) : this(appCtx, activityResultRegistry, dbHelper, false)
     {
         runOnThread(Dispatchers.IO)
@@ -85,6 +116,10 @@ class PointCreationVM(
         }
     }
 
+    /**
+     * Method that initializes all important attributes with data from [row]
+     * @param row [PointRow] DB entry of point which is updated
+     */
     private fun initFromRow(row: PointRow)
     {
         this.row = row
@@ -121,6 +156,7 @@ class PointCreationVM(
     val updating = MutableLiveData(false)
     val deletedFiles = mutableListOf<Uri>()
 
+    /*
     private val _connectionState = MutableLiveData<ConnectionState>(ConnectionState.NONE)
     val connectionState: LiveData<ConnectionState> = _connectionState
 
@@ -128,9 +164,12 @@ class PointCreationVM(
     val connectionErrorMsg: LiveData<String> = _connectionErrorMsg
 
 
+     */
+
     private lateinit var takePhotoLauncher : ActivityResultLauncher<Unit>
     private lateinit var takeVideoLauncher : ActivityResultLauncher<Unit>
 
+    /*
     private var service : ConnectionService? = null
 
     private val serviceConnection = object : ServiceConnection {
@@ -147,6 +186,8 @@ class PointCreationVM(
             service = null
         }
     }
+
+     */
 
     lateinit var point: Point
     val pointName = MutableLiveData("")
@@ -177,8 +218,8 @@ class PointCreationVM(
 
         runOnThread(Dispatchers.IO)
         {
-            val running = appCtx.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).getBoolean("Service_Running",false)
-            if(running) bind()
+         //   val running = appCtx.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).getBoolean("Service_Running",false)
+         //   if(running) bind()
 
             takePhotoLauncher = activityResultRegistry.register("takePhoto", PhotoContract()){
                 storeNewFileUri(it)
@@ -195,6 +236,11 @@ class PointCreationVM(
         }
     }
 
+    /**
+     * Method that prepares [symbolCreationVMHelper]
+     * @param symbolString String with symbol code
+     * @param menuString Formatted string from which menu is constructed
+     */
     private fun setSymbol(symbolString: String, menuString: String)
     {
         symbolCreationVMHelper.model.menuIdsString = menuString
@@ -203,6 +249,11 @@ class PointCreationVM(
         symbolCreationVMHelper.bitMap.postValue(symbolCreationVMHelper.model.symbol.imageBitmap)
     }
 
+    /**
+     *  Method that gets file's media type from its [Uri]
+     *  @param uri [Uri] of file whose type we want
+     *  @return [MimeTypes] value representing file type or [MimeTypes.UNKNOWN] if file type is unknown or unsupported
+     */
     private fun getMediaType(uri: Uri): MimeTypes
     {
         val mediaTypeRaw = appCtx.contentResolver.getType(uri)
@@ -213,6 +264,10 @@ class PointCreationVM(
         }
     }
 
+    /**
+     * Method that stores file [Uri] in point
+     * @param uri File [Uri]
+     */
     private fun storeNewFileUri(uri: Uri?)
     {
         if(uri != null)
@@ -233,12 +288,16 @@ class PointCreationVM(
             runOnThread(Dispatchers.Main)
             {
                 Log.d("PointCreationVM","Could not obtain uri for some reason")
-                _connectionErrorMsg.postValue("Could not get document URI")
+                liveServiceState.onServiceErroStringChange("Could not get document URI")
             }
 
         }
     }
 
+    /**
+     * Method that edits points name
+     * @param newName
+     */
     fun editName(newName: String)
     {
         pointName.value = newName
@@ -248,6 +307,10 @@ class PointCreationVM(
         }
     }
 
+    /**
+     * Method that edits points description
+     * @param newDescr
+     */
     fun editDescription(newDescr: String)
     {
         pointDescription.value = newDescr
@@ -256,6 +319,11 @@ class PointCreationVM(
             _pointDescr = newDescr
         }
     }
+
+    /**
+     * Method that stores vm's current state and launches [GetLocFromLocActivity]
+     * @param context Context for starting activity
+     */
     fun editLocation(context: Context)
     {
         runOnThread(Dispatchers.IO)
@@ -273,6 +341,9 @@ class PointCreationVM(
         }
     }
 
+    /**
+     * Method that launches take photo activity from [takePhotoLauncher] if device has camera.
+     */
     fun takePhotoFromCamera()
     {
         val hasCamera = appCtx.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
@@ -281,10 +352,14 @@ class PointCreationVM(
             takePhotoLauncher.launch(Unit)
         } else
         {
-            _connectionErrorMsg.postValue("This device has no camera")
+            liveServiceState.onServiceErroStringChange("This device has no camera")
         }
     }
 
+    /**
+     * Method that launches take video activity from [takeVideoLauncher] if device has camera.
+     * UNUSED due to bug that prevents upload of longer videos. When bug will be fixed just uncomment it in view
+     */
     fun takeVideoFromCamera()
     {
         val hasCamera = appCtx.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
@@ -293,10 +368,14 @@ class PointCreationVM(
             takeVideoLauncher.launch(Unit)
         } else
         {
-            _connectionErrorMsg.postValue("This device has no camera")
+            liveServiceState.onServiceErroStringChange("This device has no camera")
         }
     }
 
+    /**
+     * Method that deletes file on given [path]
+     * @param path Path to file
+     */
     fun removeUri(path: String)
     {
         runOnThread(Dispatchers.IO)
@@ -305,6 +384,7 @@ class PointCreationVM(
             tmp.removeIf{ it.first == path}
             addedDocuments.removeIf { it.toString() == path }
 
+            //if point is updated and user decides to leave without updating, so I don't delete files right away
             if(updating.value == true)
             {
                 deletedFiles.add(Uri.parse(path))
@@ -320,14 +400,20 @@ class PointCreationVM(
 
     }
 
+    /**
+     * Method that sends point to Locus Map adds it ID and sets [SetAllPointsOnMapActivity] as callback when point is
+     * touched. After that it renders points symbol and then sends point to Locus Map.
+     * @param newPoint Point that will be sent to Locus Map
+     * @param id Points ID in clients database
+     */
     private fun sendPointToLocus(newPoint: Point,id: Long)
     {
         Log.d("PointCreationVM", id.toString())
         newPoint.extraData!!.addParameter(2,id.toString())
         newPoint.setExtraOnDisplay(
             "com.example.jmb_bms",
-            "com.example.jmb_bms.activities.DummyActivity",
-            "op",
+            "com.example.jmb_bms.activities.SetAllPointsOnMapActivity",
+            "op", //not used so random values
             "e"
         )
 
@@ -337,10 +423,11 @@ class PointCreationVM(
         ActionDisplayPoints.sendPackSilent(appCtx,packPoints,true)
     }
 
+    /**
+     * Method that creates point offline
+     */
     fun createPointOffline()
     {
-        //TODO check if everything is in place
-
         runOnThread(Dispatchers.IO)
         {
             val newPoint = createPoint()
@@ -356,6 +443,9 @@ class PointCreationVM(
         }
     }
 
+    /**
+     * Method that creates point and sends it to server
+     */
     fun createPointOnline()
     {
         runOnThread(Dispatchers.IO)
@@ -368,10 +458,16 @@ class PointCreationVM(
                 return@runOnThread
             }
             sendPointToLocus(newPoint, id)
-            service?.sendPoint(id)
+            serviceBinder.service?.sendPoint(id)
         }
     }
 
+    /**
+     * Method that creates [PointRow] and stores it in database.
+     * @param newPoint Point object that holds points location
+     * @param online Flag that indicates if points is created online or offline
+     * @return Points ID in local database
+     */
     private fun storePointInDb(newPoint: Point,online: Boolean): Long
     {
         val pointRow = PointRow(
@@ -388,10 +484,17 @@ class PointCreationVM(
         )
         return dbHelper.addPoint(pointRow)
     }
+
+    /**
+     * Method that creates point that can be sent to Locus. It initializes all necessary data like name or adds tag
+     * by which client resolves which point is his and which is from Locus.
+     * @return Point with all data stored in it with DB ID only missing
+     */
     private fun createPoint(): Point
     {
         val newPoint = Point("",point.location)
 
+        //if no value is entered it gives name of symbol to point
         if( _pointName == "" )
         {
             _pointName = symbolCreationVMHelper.selectedOptStack.value.last().value.iconTuple!!.iconName
@@ -400,7 +503,7 @@ class PointCreationVM(
 
         newPoint.name = _pointName
         newPoint.extraData = GeoDataExtra()
-        newPoint.extraData!!.addParameter(1,"jmb_bms")
+        newPoint.extraData!!.addParameter(1,"jmb_bms") //tag by which client knows origin of point
         newPoint.parameterDescription = _pointDescr
 
         addedDocuments.forEach{
@@ -415,6 +518,9 @@ class PointCreationVM(
         return newPoint
     }
 
+    /**
+     * Method that sets existing point stored in [point] attribute with new values.
+     */
     private fun createPointForUpdate()
     {
         Log.d("RecievedPoint","${point.location.latitude}-${point.location.longitude}")
@@ -427,7 +533,7 @@ class PointCreationVM(
         point.extraData!!.addParameter(2,row.id.toString())
         point.setExtraOnDisplay(
                 "com.example.jmb_bms",
-                "com.example.jmb_bms.activities.DummyActivity",
+                "com.example.jmb_bms.activities.SetAllPointsOnMapActivity",
                 "op",
                 "e"
             )
@@ -438,7 +544,11 @@ class PointCreationVM(
         }
     }
 
-
+    /**
+     * Method that updates point and its database entry and if point is online point it will also send point update message
+     * @param atEnd Closure that is invoked on main thread after all operations happen. It is here because of whole
+     * simulating backward movement thing caused by getting location from Locus.
+     */
     fun updatePoint(atEnd:  () -> Unit)
     {
         runOnThread(Dispatchers.IO)
@@ -464,7 +574,7 @@ class PointCreationVM(
             dbHelper.updatePointIdentById(row)
             createPointForUpdate()
 
-            service?.pointModel?.sendUpdatePoint(row.id)
+            serviceBinder.service?.pointModel?.sendUpdatePoint(row.id)
 
             Log.d("PointCreationVM", row.id.toString())
             ActionDisplayPoints.removePackFromLocus(appCtx,row.id.toString())
@@ -483,6 +593,7 @@ class PointCreationVM(
         }
     }
 
+    /*
     override fun onOnServiceStateChanged(newState: ConnectionState) {
         if(newState == _connectionState.value) return
         Log.d("PointCreationVM","New State: $newState")
@@ -517,8 +628,17 @@ class PointCreationVM(
         }
         service = null
     }
+
+
+     */
     companion object{
 
+        /**
+         * Static method that creates custom vm factory for [PointCreationVM] that invokes primary constructor.
+         * @param context Application context for Locus methods, symbol rendering and starting other activities
+         * @param activityResultRegistry Result registry for registering callbacks that parses results from other activities like camera
+         * @param dbHelper DB helper for points database
+         */
         fun create(context: Context, activityResultRegistry: ActivityResultRegistry,dbHelper: PointDBHelper): ViewModelProvider.Factory{
 
             return object : ViewModelProvider.Factory{
@@ -531,6 +651,15 @@ class PointCreationVM(
                 }
             }
         }
+
+        /**
+         * Static method that creates custom vm factory for [PointCreationVM] that invokes secondary constructor that
+         * initializes [PointCreationVM] from point identified by [id] and sets [updating] to true.
+         * @param id ID of point that will be updated
+         * @param context Application context for Locus methods, symbol rendering and starting other activities
+         * @param activityResultRegistry Result registry for registering callbacks that parses results from other activities like camera
+         * @param dbHelper DB helper for points database
+         */
         fun create(id: Long,context: Context, activityResultRegistry: ActivityResultRegistry,dbHelper: PointDBHelper): ViewModelProvider.Factory{
 
             return object : ViewModelProvider.Factory{
@@ -543,6 +672,15 @@ class PointCreationVM(
                 }
             }
         }
+
+        /**
+         * Static method that creates custom vm factory for [PointCreationVM] that invokes secondary constructor that initializes
+         * [PointCreationVM] with state stored in database and updates points location with location stored in [locBundle].
+         * @param locBundle Bundle with new location
+         * @param context Application context for Locus methods, symbol rendering and starting other activities
+         * @param activityResultRegistry Result registry for registering callbacks that parses results from other activities like camera
+         * @param dbHelper DB helper for points database
+         */
         fun create(locBundle: Bundle? ,context: Context, activityResultRegistry: ActivityResultRegistry, dbHelper: PointDBHelper): ViewModelProvider.Factory{
 
             return object : ViewModelProvider.Factory{
@@ -559,6 +697,6 @@ class PointCreationVM(
 
     override fun onCleared() {
         super.onCleared()
-        unbind()
+        serviceBinder.unbind()
     }
 }

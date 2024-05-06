@@ -1,3 +1,8 @@
+/**
+ * @file: FileSharingRequests.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing FileSharingRequests class
+ */
 package com.example.jmb_bms.connectionService
 
 import android.net.Uri
@@ -30,9 +35,18 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.X509TrustManager
 import kotlin.math.roundToInt
 
-
+/**
+ * Class that has methods for sending files to server or getting them from server. Classic HTTP POST and GET methods are used.
+ * @param connectionService Reference to connection service to access its model and use it as context
+ */
 class FileSharingRequests(val connectionService: ConnectionService, val comCentral: InnerCommunicationCentral) {
 
+    /**
+     * Method that creates Http client that can be used to communicate with server. Note that this client doesn't check
+     * certificate validity and will accept any certificate. But most of the time ip address is used to connect to
+     * server so dns is used where we could get fake dns entry. It is also easier for testing to use self-signed certificates
+     * when running server on my computer. In the future I will add option in settings to check/ not check server certificates
+     */
     fun getClient() = HttpClient(CIO){
         engine{
             https {
@@ -43,13 +57,19 @@ class FileSharingRequests(val connectionService: ConnectionService, val comCentr
                         override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
                         override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
                     }
-                    Log.d("HERE","--------------------------------------------------------------------------------------")
                     trustManager = trustAllCerts
                 }
             }
         }
     }
 
+    /**
+     * Method for uploading file to server. Note that you must have active websocket connection to upload file.
+     * @param uri Uploaded file [Uri]
+     * @param pointData Flag indicating that this file upload is part of larger upload
+     * @param transactionId Transaction ID used to add uploaded file to larger transaction
+     * @return [HttpResponse]
+     */
     @OptIn(InternalAPI::class)
     suspend fun uploadFile(uri: Uri, pointData: Boolean, transactionId: String? = null): HttpResponse{
 
@@ -90,9 +110,15 @@ class FileSharingRequests(val connectionService: ConnectionService, val comCentr
         }
     }
 
-    @OptIn(InternalAPI::class)
+    /**
+     * Method for downloading file from server. Note that you must have active websocket connection to do so.
+     * @param serverFileName File name
+     * @param file [File] into which downloaded file will be stored
+     * @return [SharedFlow]<[DownloadResult]> In which file is downloaded and download status is emitted.
+     */
     suspend fun downloadRequest(serverFileName: String, file: File ): SharedFlow<DownloadResult>
     {
+        //last three emits are emitted for new collector, it can not be replayed
         val shFlow = MutableSharedFlow<DownloadResult>(replay = 0, extraBufferCapacity = 3)
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -105,12 +131,12 @@ class FileSharingRequests(val connectionService: ConnectionService, val comCentr
                     val channel: ByteReadChannel = response.body()
                     while (!channel.isClosedForRead){
 
-                        val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
+                        val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong()) //get one packet from channel and read it
                         while (!packet.isEmpty)
                         {
                             val bytes = packet.readBytes()
                             file.appendBytes(bytes)
-                            val progress = file.length() * 100f / response.contentLength()!!
+                            val progress = file.length() * 100f / response.contentLength()!! //calculate download percentage
                             shFlow.emit(DownloadResult.Progress(progress.roundToInt()))
                         }
                     }
@@ -130,7 +156,13 @@ class FileSharingRequests(val connectionService: ConnectionService, val comCentr
         return shFlow.asSharedFlow()
     }
 
-
+    /**
+     * Method for sending multiple files at once. Note that you must have active websocket connection to do so.
+     * @param transactionId Transaction ID used to add uploaded file to larger transaction. If they are separate upload pass null
+     * @param files [List]<[Uri]> with all files that are going to be uploaded
+     * @param onFail Closure that is invoked when upload fails
+     * @return True if all files were uploaded else false
+     */
     suspend fun sendMultipleFiles(transactionId: String?, files: List<Uri>, onFail: suspend () -> Unit): Boolean
     {
         val responses = files.map {
@@ -146,6 +178,7 @@ class FileSharingRequests(val connectionService: ConnectionService, val comCentr
             }
         }.awaitAll()
 
+        //check all responses, if even one failed return false
         responses.forEach {
             Log.d("SendPoint","UploadFile response status is: ${it?.status}")
             if( it == null || !it.status.isSuccess())

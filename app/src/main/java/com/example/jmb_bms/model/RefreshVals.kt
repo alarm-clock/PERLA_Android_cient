@@ -1,3 +1,8 @@
+/**
+ * @file: RefreshVals.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing RefreshVals class
+ */
 package com.example.jmb_bms.model
 
 import kotlin.time.Duration
@@ -5,6 +10,11 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Enum class with all possible location refresh values.
+ * @param menuString String that will be shown in menus
+ * @param delay [Duration] value that is used in location sharing
+ */
 enum class RefreshVals(val menuString: String, val delay: Duration) {
     S1("1s", 1.seconds ),
     S5("5s",5.seconds),

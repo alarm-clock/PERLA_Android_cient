@@ -15,7 +15,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -23,9 +22,8 @@ import androidx.compose.ui.unit.sp
 import com.example.jmb_bms.model.menu.MenuItem
 import com.example.jmb_bms.model.menu.MenuItems
 import com.example.jmb_bms.ui.theme.LocalTheme
-import com.example.jmb_bms.ui.theme.MyTypographyDark
 import com.example.jmb_bms.ui.theme.TestTheme
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import org.burnoutcrew.reorderable.*
 
@@ -120,7 +118,7 @@ fun ReorderableMenu(menuItems: MenuItems, padding: PaddingValues, longestString:
 
 
 @Composable
-fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocationFromLoc, backButtonLogic: () -> Unit)
+fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocationFromPhone, backButtonLogic: () -> Unit)
 {
     val longestString = menuItems.longestString
     var enableReord by remember { mutableStateOf(false)}
@@ -152,7 +150,7 @@ fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocati
 
 
 @Composable
-fun mainMenu(currTime : LiveTime, currLoc: LiveLocationFromLoc, menuItems: MenuItems, backButtonLogic: () -> Unit)
+fun mainMenu(currTime : LiveTime, currLoc: LiveLocationFromPhone, menuItems: MenuItems, backButtonLogic: () -> Unit)
 {
     TestTheme() {
         ScrollableMenu(menuItems,currTime,currLoc, backButtonLogic)

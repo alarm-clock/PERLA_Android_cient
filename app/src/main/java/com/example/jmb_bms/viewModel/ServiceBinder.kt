@@ -1,3 +1,8 @@
+/**
+ * @file: ServiceBinder.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing ServiceBinder class
+ */
 package com.example.jmb_bms.viewModel
 
 import android.content.ComponentName
@@ -12,6 +17,13 @@ import com.example.jmb_bms.connectionService.ConnectionService
 import com.example.jmb_bms.connectionService.ConnectionState
 import com.example.jmb_bms.connectionService.in_app_communication.*
 
+/**
+ * Class which takes care of binding, unbinding, registering callbacks and hold reference to service if it's running
+ *
+ * @param appCtx Application context for binding and unbinding
+ * @param callBacksForRegister list of classes which will be registered as callback for their respective interfaces in [setCallbacks] method
+ * @constructor Binds to service
+ */
 class ServiceBinder(private val appCtx: Context, private val callBacksForRegister: List<Any>){
 
     var service : ConnectionService? = null
@@ -31,7 +43,10 @@ class ServiceBinder(private val appCtx: Context, private val callBacksForRegiste
         bind()
     }
 
-    fun bind()
+    /**
+     * Method for binding to service
+     */
+    private fun bind()
     {
         if(service != null) return
 
@@ -43,6 +58,9 @@ class ServiceBinder(private val appCtx: Context, private val callBacksForRegiste
         appCtx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
+    /**
+     * Method for unbinding service. Also unsets all callbacks before unbinding
+     */
     fun unbind()
     {
         unsetCallBacks()
@@ -53,6 +71,9 @@ class ServiceBinder(private val appCtx: Context, private val callBacksForRegiste
         service = null
     }
 
+    /**
+     * Method for setting all callbacks passed to constructor in [callBacksForRegister] list
+     */
     private fun setCallbacks()
     {
         callBacksForRegister.forEach {
@@ -66,6 +87,9 @@ class ServiceBinder(private val appCtx: Context, private val callBacksForRegiste
         }
     }
 
+    /**
+     * Method for unsetting all callbacks stored in [callBacksForRegister] to prevent memory leaks before unbinding
+     */
     private fun unsetCallBacks()
     {
         callBacksForRegister.forEach {

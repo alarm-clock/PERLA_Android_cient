@@ -1,3 +1,8 @@
+/**
+ * @file: ChatRelatedModel.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing ChatRelatedModel class
+ */
 package com.example.jmb_bms.connectionService.models
 
 import android.net.Uri
@@ -21,9 +26,21 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Chat related model
+ *
+ * @property service
+ * @property communicationCentral
+ * @constructor Create empty Chat related model
+ */
 class ChatRelatedModel(val service: ConnectionService, val communicationCentral: InnerCommunicationCentral) {
 
 
+    /**
+     * Parse chat creation
+     *
+     * @param params
+     */
     fun parseChatCreation(params: Map<String, Any?>)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -48,6 +65,11 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
 
     }
 
+    /**
+     * Parse chat deletion
+     *
+     * @param params
+     */
     fun parseChatDeletion(params: Map<String, Any?>)
     {
         val id = params["_id"] as? String ?: return
@@ -57,11 +79,16 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
         dbHelper.removeChatRoom(id)
         dbHelper.close()
 
-        //TODO delete files
+
 
         communicationCentral.sendChatRoomsUpdate(id,false)
     }
 
+    /**
+     * Method that creates message from [params]
+     * @param params Parsed JSON message
+     * @return [ChatMessage] or null if error occurred
+     */
     private fun createMsgFromParams(params: Map<String, Any?>): ChatMessage? {
         val id = params["_id"] as? Double ?: return null
         val chatId = params["chatId"] as? String ?: return null
@@ -91,6 +118,11 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
         )
     }
 
+    /**
+     * Parse message
+     *
+     * @param params
+     */
     fun parseMessage(params: Map<String, Any?>)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -107,6 +139,11 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
         }
     }
 
+    /**
+     * Method that parses multiple chat messages at once
+     * @param messages [List] of JSON string with messages
+     * @return [List]<[ChatMessage]>
+     */
     private fun parseMultipleMessages(messages: List<String>): List<ChatMessage>
     {
         val res = mutableListOf<ChatMessage>()
@@ -123,6 +160,11 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
         return res
     }
 
+    /**
+     * Parse multiple messages
+     *
+     * @param params
+     */
     fun parseMultipleMessages(params: Map<String, Any?>)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -134,7 +176,11 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
         }
     }
 
-
+    /**
+     * Send message
+     *
+     * @param message
+     */
     suspend fun sendMessage(message: ChatMessage)
     {
         val transactionId = "${service.serviceModel.profile.serverId}@${
@@ -162,11 +208,9 @@ class ChatRelatedModel(val service: ConnectionService, val communicationCentral:
         service.sendMessage(ClientMessage.sendMessage(message,transactionId))
     }
 
-    suspend fun updateChatsOwner(params: Map<String, Any?>)
-    {
-
-    }
-
+    /**
+     * Method that sends fetch request for newest messages
+     */
     fun fetchNewestMessages()
     {
         CoroutineScope(Dispatchers.IO).launch {

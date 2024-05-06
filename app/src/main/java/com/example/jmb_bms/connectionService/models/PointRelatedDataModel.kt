@@ -183,7 +183,7 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         newPoint.extraData!!.addParameter(2,point.id.toString())
         newPoint.setExtraOnDisplay(
             "com.example.jmb_bms",
-            "com.example.jmb_bms.activities.DummyActivity",
+            "com.example.jmb_bms.activities.SetAllPointsOnMapActivity",
             "op",
             "e"
         )

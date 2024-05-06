@@ -1,7 +1,18 @@
+/**
+ * @file: IconMenuName.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing IconMenuName annotation. If you are wondering if I wrote all those lines answer is no.
+ * This file was written by kotlin program that I wrote to not destroy my carpal tunnels while I'm young.
+ */
 package com.example.jmb_bms.model.icons
 
 import androidx.annotation.StringDef
 
+/**
+ * Annotation that servers as "datatype/enum" for icons menu names during compilation to save memory during runtime.
+ * Enum class eats too much memory and using annotation serves as "hack" to have datatype check during compilation so
+ * correct values are passed to methods but to not have all string loaded on ram when only some of them are really used.
+ */
 @StringDef(
     IconMenuName.GROUND_TRACK,
     IconMenuName.UNIT,

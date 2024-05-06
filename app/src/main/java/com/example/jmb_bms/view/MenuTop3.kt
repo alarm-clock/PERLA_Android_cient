@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import com.example.jmb_bms.connectionService.ConnectionState
 import com.example.jmb_bms.ui.theme.LocalTheme
-import com.example.jmb_bms.viewModel.LiveLocationFromLoc
+import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 
 @Composable
@@ -64,7 +64,7 @@ fun ConnectionStateRow(connectionState: LiveData<ConnectionState>)
 
 
 @Composable
-fun MenuTop3(currTimeVM: LiveTime, currLocVM: LiveLocationFromLoc, connectionState: LiveData<ConnectionState>)
+fun MenuTop3(currTimeVM: LiveTime, currLocVM: LiveLocationFromPhone, connectionState: LiveData<ConnectionState>)
 {
 
     val scheme = LocalTheme.current

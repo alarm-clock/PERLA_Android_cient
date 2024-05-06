@@ -1,3 +1,8 @@
+/**
+ * @file: MainMenuItems.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing MainMenuItems class
+ */
 package com.example.jmb_bms.model.menu
 
 import android.content.Context
@@ -14,6 +19,12 @@ import androidx.compose.material.icons.twotone.Map
 import com.example.jmb_bms.activities.*
 import com.example.jmb_bms.view.MainMenuItem
 
+/**
+ * Class that serves as main menu model for reordering. It defines menu elements and methods for their reordering.
+ * @param shPref [SharedPreferences] in which menu order is stored
+ * @param context Context used start activities when option is picked
+ * @constructor Creates [menuState] from which then reorders menu like user ordered it and adds divider flag to last element
+ */
 class MainMenuItems(shPref: SharedPreferences, context: Context) : MenuItems {
 
     private var listOfItems = mutableListOf(
@@ -62,10 +73,21 @@ class MainMenuItems(shPref: SharedPreferences, context: Context) : MenuItems {
         addDividerFlagForLastElement()
     }
 
+    /**
+     * Method that adds divider flag to last element in [listOfItems]
+     */
     private fun addDividerFlagForLastElement() { listOfItems[listOfItems.lastIndex].lastElement = true }
 
+    /**
+     * Method that removes divider flag to last element in [listOfItems]
+     */
     private fun removeDividerFlagForLastElement() { listOfItems[listOfItems.lastIndex].lastElement = false }
 
+    /**
+     * Method that changes element location in model
+     * @param oldIndex Index on which rated element currently is
+     * @param newIndex Index where element must be moved
+     */
     override fun changeLocationOfElement(oldIndex: Int, newIndex: Int)
     {
         if(oldIndex == listOfItems.lastIndex || newIndex == listOfItems.lastIndex) removeDividerFlagForLastElement()
