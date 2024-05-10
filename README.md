@@ -77,7 +77,7 @@ In the error you will find which version is compatible with used gradle version.
 The app can be installed onto the device in many ways. The simplest way to do it is by uploading the add-debug.apk file to Google Drive, where you can download it to any device. Another possible way is to upload it to the target device by using `adb`. When the file
 will be present on device storage; just open it in the Storage application, and then you will be prompted to install the PERLA client.
 By default, you can not install apps from the storage application, so you will be prompted to change it in settings. You must do that.
-After that, the application should be installed and ready to run.
+After that, the application should be installed and ready to run. More information you can find in `Manual.pdf`.
 
 
 
