@@ -1,3 +1,8 @@
+/**
+ * @file TeamDetailScreen.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions team detail
+ */
 package com.example.jmb_bms.view.server
 
 import androidx.compose.foundation.*
@@ -25,7 +30,6 @@ import com.example.jmb_bms.view.MenuTop1
 import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.server.ServerVM
-
 
 @Composable
 fun UserCheckBoxRow(serverVM: ServerVM, profile: AddingScreenTuple)

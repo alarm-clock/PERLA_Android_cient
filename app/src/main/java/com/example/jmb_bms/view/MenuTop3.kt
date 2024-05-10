@@ -1,3 +1,8 @@
+/**
+ * @file: MenuTop3.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing menu top and connection state row
+ */
 package com.example.jmb_bms.view
 
 import androidx.compose.foundation.background
@@ -20,6 +25,11 @@ import com.example.jmb_bms.ui.theme.LocalTheme
 import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 
+/**
+ * Not connected top
+ *
+ * @param color of the dot
+ */
 @Composable
 fun NotConnectedTop(color: Color)
 {
@@ -27,6 +37,11 @@ fun NotConnectedTop(color: Color)
     Icon(Icons.Default.Circle, "", tint = Color.Red, modifier = Modifier.size(12.dp))
 }
 
+/**
+ * Negotiating top
+ *
+ * @param color color of the dot
+ */
 @Composable
 fun NegotiatingTop(color: Color)
 {
@@ -34,6 +49,11 @@ fun NegotiatingTop(color: Color)
     Icon(Icons.Default.Circle, "", tint = Color.Yellow, modifier = Modifier.size(12.dp))
 }
 
+/**
+ * Connection state row
+ *
+ * @param connectionState Live data with connection state
+ */
 @Composable
 fun ConnectionStateRow(connectionState: LiveData<ConnectionState>)
 {
@@ -62,7 +82,13 @@ fun ConnectionStateRow(connectionState: LiveData<ConnectionState>)
     }
 }
 
-
+/**
+ * Menu top with connection state
+ *
+ * @param currTimeVM VM with time
+ * @param currLocVM VM with location
+ * @param connectionState Live data with connection state
+ */
 @Composable
 fun MenuTop3(currTimeVM: LiveTime, currLocVM: LiveLocationFromPhone, connectionState: LiveData<ConnectionState>)
 {

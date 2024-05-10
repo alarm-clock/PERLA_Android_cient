@@ -1,5 +1,9 @@
+/**
+ * @file: MainMenu1.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing view for main menu
+ */
 package com.example.jmb_bms.view
-
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.*
@@ -36,7 +40,13 @@ fun RowData( longestString: Int,name: String, icon: ImageVector)
     Text(name, fontSize = 35.sp, modifier = Modifier.width((longestString * 16).dp), color = MaterialTheme.colorScheme.onPrimary)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+/**
+ * Menu item
+ *
+ * @param menuItem
+ * @param longestString Length of longest string
+ * @param clickable
+ */
 @Composable
 fun Item(menuItem: MenuItem, longestString: Int, clickable: Boolean = true)
 {
@@ -52,12 +62,25 @@ fun Item(menuItem: MenuItem, longestString: Int, clickable: Boolean = true)
         }
 }
 
+/**
+ * Small line
+ *
+ * @param color
+ * @param thicknessDp
+ */
 @Composable
 fun Divider ( color : Color, thicknessDp: Dp)
 {
     Box(Modifier.fillMaxWidth().height(thicknessDp).background(color))
 }
 
+/**
+ * Classic menu
+ *
+ * @param menuItems
+ * @param padding
+ * @param longestString
+ */
 @Composable
 fun ClasisMenu(menuItems: MenuItems, padding: PaddingValues, longestString: Int)
 {
@@ -73,6 +96,13 @@ fun ClasisMenu(menuItems: MenuItems, padding: PaddingValues, longestString: Int)
     }
 }
 
+/**
+ * Reorder-able main menu version
+ *
+ * @param menuItems
+ * @param padding
+ * @param longestString
+ */
 @Composable
 fun ReorderableMenu(menuItems: MenuItems, padding: PaddingValues, longestString: Int)
 {
@@ -116,7 +146,14 @@ fun ReorderableMenu(menuItems: MenuItems, padding: PaddingValues, longestString:
     }
 }
 
-
+/**
+ * Scrollable menu
+ *
+ * @param menuItems
+ * @param currTime
+ * @param currLoc
+ * @param backButtonLogic
+ */
 @Composable
 fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocationFromPhone, backButtonLogic: () -> Unit)
 {
@@ -148,7 +185,15 @@ fun ScrollableMenu(menuItems: MenuItems, currTime: LiveTime, currLoc: LiveLocati
     }
 }
 
-
+/**
+ * Main menu
+ *
+ * @param currTime
+ * @param currLoc
+ * @param menuItems
+ * @param backButtonLogic
+ * @receiver
+ */
 @Composable
 fun mainMenu(currTime : LiveTime, currLoc: LiveLocationFromPhone, menuItems: MenuItems, backButtonLogic: () -> Unit)
 {

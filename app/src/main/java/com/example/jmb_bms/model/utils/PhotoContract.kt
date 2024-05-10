@@ -53,9 +53,7 @@ class PhotoContract: ActivityResultContract<Unit, Uri?>() {
      */
     private fun createImageFile(context: Context): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDirectory = context.filesDir //context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)  //
-
-        //File(context.filesDir,"images/JMB_BMS_JPG_$timeStamp.jpg")
+        val storageDirectory = context.filesDir
 
         return File.createTempFile(
             "JMB_BMS_JPG_${timeStamp}_", ".jpg", storageDirectory

@@ -1,3 +1,8 @@
+/**
+ * @file CreateChatRooms.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for creating chat room view
+ */
 package com.example.jmb_bms.view.chat
 
 import androidx.compose.foundation.*
@@ -23,7 +28,6 @@ import com.example.jmb_bms.view.MenuTop3
 import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.chat.CreateChatRoomVM
-
 
 @Composable
 fun RoomNameInput(vm: CreateChatRoomVM)

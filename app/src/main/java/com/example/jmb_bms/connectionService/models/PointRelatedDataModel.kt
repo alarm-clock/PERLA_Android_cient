@@ -1,3 +1,8 @@
+/**
+ * @file: PointRelatedDataModel.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing PointRelatedDataModel class
+ */
 package com.example.jmb_bms.connectionService.models
 
 import android.content.Intent
@@ -34,9 +39,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
+/**
+ * Class that implements all point related methods for message parsing
+ *
+ * @property service [ConnectionService] used to access [ConnectionService.session]
+ * @property communicationCentral For observer's callbacks invoking
+ */
 class PointRelatedDataModel(val service: ConnectionService, val communicationCentral: InnerCommunicationCentral) {
-
-
 
     val downloads = CopyOnWriteArrayList<Pair<Uri, SharedFlow<DownloadResult>>>()
 
@@ -54,11 +63,22 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         }
     }
 
+    /**
+     * Method that checks if file is downloaded
+     *
+     * @param uri [Uri] referencing checked file
+     * @return [SharedFlow] with [DownloadResult] instance
+     */
     fun checkIfFileIsDownloaded(uri: Uri): SharedFlow<DownloadResult>?
     {
         return downloads.find { it.first == uri }?.second
     }
 
+    /**
+     * Method that parses point creation message received from server
+     *
+     * @param params Parsed JSON message
+     */
     fun parsePointCreationResponse(params: Map<String, Any?>)
     {
         val succ = params["success"] as? Boolean ?: return
@@ -94,6 +114,11 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         dbHelper.close()
     }
 
+    /**
+     * Method that collects download flow and manages it
+     *
+     * @param pair [Pair]<Uri to file, Download flow>
+     */
     private suspend fun collectDownloadFlow(pair: Pair<Uri, SharedFlow<DownloadResult>>)
     {
         pair.second.collect{
@@ -111,6 +136,11 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         }
     }
 
+    /**
+     * Method that parses point deletion message received from server
+     *
+     * @param params Parsed JSON message
+     */
     fun parseDeletePoint(params: Map<String, Any?>)
     {
         val serverId = params["serverId"] as? String ?: return
@@ -129,6 +159,12 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         dbHelper.close()
     }
 
+    /**
+     * Method tha downloads all files stored in [list]
+     *
+     * @param list List with files that must be downloaded
+     * @return [List] with downloaded files [Uri]s
+     */
     private suspend fun downloadPointFiles(list: List<String>?): List<Uri>?
     {
         if(list.isNullOrEmpty()) return null
@@ -166,6 +202,11 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         return uriList
     }
 
+    /**
+     * Method that sends point to Locus
+     *
+     * @param point Point that will be sent
+     */
     private fun addPointToMap(point: PointRow)
     {
         val newPoint = Point("",point.location)
@@ -194,6 +235,13 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         ActionDisplayPoints.sendPackSilent(service,packPoints,false)
     }
 
+    /**
+     * Method that compares new set of files and files stored in point and deletes those that are in [point] but aren't
+     * in [newFiles] nd downloads those that are in [newFiles] but not in [point]
+     *
+     * @param newFiles Reference list
+     * @param point Stored point
+     */
     private suspend fun compareFilesAndManageThem(newFiles: List<String>?, point: PointRow)
     {
         if(newFiles.isNullOrEmpty())
@@ -228,6 +276,12 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         point.uris?.addAll( urisToAdd )
 
     }
+
+    /**
+     * Method that parses point creation message received from server
+     *
+     * @param params Parsed JSON message
+     */
     fun parsePointCreation(params: Map<String, Any?>)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -307,6 +361,11 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         return true
     }
 
+    /**
+     * Method that sends point to server identified by [id]
+     *
+     * @param id ID of point that will be sent
+     */
     suspend fun sendPoint(id: Long)
     {
         val requestMaker = FileSharingRequests(service,communicationCentral)
@@ -319,6 +378,10 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
             return
         }
 
+        //transaction id is created here because client can create unique id for whole system
+        //it is done by adding user id that is unique for whole system into transaction id
+        //then I need just need to make it unique for client and that is done by adding local points id
+        //and just to be sure timestamp
         val transactionId = if(point.serverId.isNullOrEmpty())
         {
             "${service.serviceModel.profile.serverId}@${
@@ -396,7 +459,11 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         }
     }
 
-
+    /**
+     * Method that sends update point message to server
+     *
+     * @param id ID of point that was updated
+     */
     suspend fun sendUpdatePoint(id: Long)
     {
         Log.d("SendUpdate","In function")
@@ -471,6 +538,10 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         }
     }
 
+    /**
+     * Method that sends points sync request to server
+     *
+     */
     suspend fun sendSync()
     {
         val dbHelper = PointDBHelper(service,null)
@@ -482,10 +553,13 @@ class PointRelatedDataModel(val service: ConnectionService, val communicationCen
         pointIds.forEach {
             sendPoint(it.first)
         }
-
     }
 
-
+    /**
+     * Method that handles points sync message received from server
+     *
+     * @param params Parsed JSON message
+     */
     fun handleSync(params: Map<String, Any?>)
     {
         val ids = params["ids"] as? List<String> ?: return

@@ -1,3 +1,8 @@
+/**
+ * @file Photo.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing photo view
+ */
 package com.example.jmb_bms.view.point
 
 import android.net.Uri

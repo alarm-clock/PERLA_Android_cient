@@ -1,3 +1,8 @@
+/**
+ * @file AllPoints.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for all points view
+ */
 package com.example.jmb_bms.view.point
 
 import androidx.compose.foundation.*
@@ -318,6 +323,16 @@ fun PickingDropdownMenu(vm: AllPointsVM, exp: MutableState<Boolean>)
             onClick ={
                 exp.value = false
                 vm.markAndDelete(ctx)
+            },
+            colors = menuItemColors
+        )
+        com.example.jmb_bms.view.Divider(scheme.onPrimary,0.2.dp)
+        DropdownMenuItem(
+            text = { Text("Sync all points with server", fontSize = 20.sp) },
+            trailingIcon = { Icon(Icons.Default.Refresh, "") },
+            onClick ={
+                exp.value = false
+                vm.manuallySync()
             },
             colors = menuItemColors
         )

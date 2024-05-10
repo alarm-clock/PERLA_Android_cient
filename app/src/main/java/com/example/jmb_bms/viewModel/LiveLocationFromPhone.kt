@@ -72,14 +72,6 @@ class LiveLocationFromPhone(private val locationRep: LocationRepo, ctx: Context)
         collectionJob = viewModelScope.launch {
             withContext(Dispatchers.IO)
             {
-                /*
-                locationRep.getLocUpdates().collect{ update -> //collecting from locationRep flow
-                    __location.postValue( update )
-                    Log.d("LocUpdate",update)
-
-                }
-
-                 */
 
                 if (ActivityCompat.checkSelfPermission(
                         ctx,
@@ -89,13 +81,6 @@ class LiveLocationFromPhone(private val locationRep: LocationRepo, ctx: Context)
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
                     return@withContext
                 }
 

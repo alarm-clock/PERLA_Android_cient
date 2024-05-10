@@ -1,3 +1,8 @@
+/**
+ * @file: MenuTop2.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing menu tops
+ */
 package com.example.jmb_bms.view
 
 import android.util.Log
@@ -22,6 +27,15 @@ import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 
 
+/**
+ * Menu top with connection state and back button
+ *
+ * @param currTime VM with time
+ * @param currLoc VM with location
+ * @param connectionState Live data with connection state
+ * @param backButtonLogic Closure with code that will be executed when bck button is pushed
+ * @param optButtonLogic Closure with code that will be executed when opt button is pushed
+ */
 @Composable
 fun MenuTop4(currTime: LiveTime, currLoc: LiveLocationFromPhone, connectionState: LiveData<ConnectionState>, backButtonLogic: () -> Unit, optButtonLogic: () -> Unit)
 {
@@ -36,7 +50,14 @@ fun MenuTop4(currTime: LiveTime, currLoc: LiveLocationFromPhone, connectionState
 }
 
 
-
+/**
+ * Menu top with back button
+ *
+ * @param currTime VM with time
+ * @param currLoc VM with location
+ * @param backButtonLogic Closure with code that will be executed when bck button is pushed
+ * @param optButtonLogic Closure with code that will be executed when opt button is pushed
+ */
 @Composable
 fun MenuTop2(currTime: LiveTime, currLoc: LiveLocationFromPhone, backButtonLogic: () -> Unit, optButtonLogic: () -> Unit)
 {
@@ -63,9 +84,11 @@ fun MenuTop2(currTime: LiveTime, currLoc: LiveLocationFromPhone, backButtonLogic
             ) {
                 TimeAndLoc(currTime,currLoc,32.sp,22.sp)
             }
-            Column( Modifier.weight(0.1f).clickable { optButtonLogic() }) {
+            /*Column( Modifier.weight(0.1f).clickable { optButtonLogic() }) {
                 Icon(Icons.Filled.MoreVert,"Options",Modifier.size(50.dp),scheme.onPrimary)
             }
+
+             */
         }
         Divider(scheme.onPrimary,1.dp)
 

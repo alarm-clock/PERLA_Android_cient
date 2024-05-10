@@ -135,12 +135,6 @@ class PointCreationVM(
 
         val pairs = this.row.uris?.map { Pair(it.toString(), getMediaType(it)) }
 
-        /*
-        symbolCreationVMHelper.model.menuIdsString = row.menuString
-        symbolCreationVMHelper.prepareMenuFromTheString(row.symbol,appCtx)
-        symbolCreationVMHelper.model.symbol = Symbol(row.symbol,appCtx,"450")
-        symbolCreationVMHelper.bitMap.postValue(symbolCreationVMHelper.model.symbol.imageBitmap)
-         */
         setSymbol(row.symbol, row.menuString)
 
         runOnThread(Dispatchers.Main)
@@ -156,38 +150,9 @@ class PointCreationVM(
     val updating = MutableLiveData(false)
     val deletedFiles = mutableListOf<Uri>()
 
-    /*
-    private val _connectionState = MutableLiveData<ConnectionState>(ConnectionState.NONE)
-    val connectionState: LiveData<ConnectionState> = _connectionState
-
-    private val _connectionErrorMsg = MutableLiveData("")
-    val connectionErrorMsg: LiveData<String> = _connectionErrorMsg
-
-
-     */
-
     private lateinit var takePhotoLauncher : ActivityResultLauncher<Unit>
     private lateinit var takeVideoLauncher : ActivityResultLauncher<Unit>
 
-    /*
-    private var service : ConnectionService? = null
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, serviceBin: IBinder?) {
-            val binder = serviceBin as ConnectionService.LocalBinder
-            service = binder.getService()
-
-            Log.d("PointCreationVM","Setting myself as callback to $service")
-            service?.setCallBack(this@PointCreationVM)
-            //service?.setComplexDataCallBack(this@ServerVM)
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            service = null
-        }
-    }
-
-     */
 
     lateinit var point: Point
     val pointName = MutableLiveData("")
@@ -593,44 +558,6 @@ class PointCreationVM(
         }
     }
 
-    /*
-    override fun onOnServiceStateChanged(newState: ConnectionState) {
-        if(newState == _connectionState.value) return
-        Log.d("PointCreationVM","New State: $newState")
-        _connectionState.postValue(newState)
-
-        //TODO add/remove online/offline option based on the state change
-    }
-
-    override fun onServiceErroStringChange(new: String) {
-        _connectionErrorMsg.postValue(new)
-    }
-
-    fun bind()
-    {
-        if(service != null) return
-
-        val running = appCtx.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).getBoolean("Service_Running",false)
-
-        if(!running) return
-        Log.d("PointCreationVM", "Binding to service")
-        val intent = Intent(appCtx, ConnectionService::class.java).putExtra("Caller","CreatePoint")
-        appCtx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-    }
-
-    fun unbind()
-    {
-        service?.unSetCallBack()
-
-        if( service != null)
-        {
-            appCtx.unbindService(serviceConnection)
-        }
-        service = null
-    }
-
-
-     */
     companion object{
 
         /**

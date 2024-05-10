@@ -1,3 +1,8 @@
+/**
+ * @file PointDetail.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for all point detail view
+ */
 package com.example.jmb_bms.view.point
 
 import androidx.compose.foundation.*
@@ -30,7 +35,6 @@ import com.example.jmb_bms.view.MenuTop1
 import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.point.PointDetailVM
-
 
 @Composable
 fun NameAndIconRow(vm: PointDetailVM)

@@ -1,3 +1,8 @@
+/**
+ * @file ServerScreen.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for server screen
+ */
 package com.example.jmb_bms.view.server
 
 import android.util.Log
@@ -33,7 +38,15 @@ import com.example.jmb_bms.viewModel.LiveLocationFromPhone
 import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.server.ServerVM
 
-
+/**
+ * User row
+ *
+ * @param profile
+ * @param serverVM
+ * @param teamLeadVersion
+ * @param isTeamLead
+ * @param showUserLocSh
+ */
 @Composable
 fun UserRow(profile: MutableLiveData<UserProfile>, serverVM: ServerVM, teamLeadVersion: Boolean = false, isTeamLead: Boolean = false, showUserLocSh: Boolean = true)
 {
@@ -109,6 +122,11 @@ fun UserRow(profile: MutableLiveData<UserProfile>, serverVM: ServerVM, teamLeadV
     }
 }
 
+/**
+ * Print connected users
+ *
+ * @param serverVM
+ */
 @Composable
 fun PrintConnectedUsers(serverVM: ServerVM)
 {
@@ -125,6 +143,11 @@ fun PrintConnectedUsers(serverVM: ServerVM)
     }
 }
 
+/**
+ * Refresh rate row
+ *
+ * @param serverVM
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RefreshRateRow(serverVM: ServerVM)
@@ -174,6 +197,12 @@ fun RefreshRateRow(serverVM: ServerVM)
     }
 }
 
+/**
+ * Row that shows connection state
+ *
+ * @param connectionState
+ * @param errMsg
+ */
 @Composable
 fun StateShow(connectionState: ConnectionState?, errMsg: String?)
 {
@@ -211,6 +240,15 @@ fun StateShow(connectionState: ConnectionState?, errMsg: String?)
     }
 }
 
+/**
+ * Custom switch
+ *
+ * @param checked
+ * @param text
+ * @param enabled
+ * @param fontSize
+ * @param onCheckedChange
+ */
 @Composable
 fun CustomSwitch(checked: Boolean, text: String, enabled: Boolean = true, fontSize: TextUnit = 30.sp, onCheckedChange: (Boolean) -> Unit)
 {
@@ -244,6 +282,12 @@ fun CustomSwitch(checked: Boolean, text: String, enabled: Boolean = true, fontSi
     }
 }
 
+/**
+ * Print team members
+ *
+ * @param teamProfile
+ * @param serverVM
+ */
 @Composable
 fun PrintTeamMembers(teamProfile: TeamLiveDataHolder, serverVM: ServerVM)
 {
@@ -265,7 +309,12 @@ fun PrintTeamMembers(teamProfile: TeamLiveDataHolder, serverVM: ServerVM)
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Print teams
+ *
+ * @param serverVM
+ * @param navHostController
+ */
 @Composable
 fun PrintTeams(serverVM: ServerVM, navHostController: NavHostController)
 {
@@ -283,6 +332,12 @@ fun PrintTeams(serverVM: ServerVM, navHostController: NavHostController)
     }
 }
 
+/**
+ * Print connected users or teams
+ *
+ * @param serverVM
+ * @param navHostController
+ */
 @Composable
 fun PrintConnectedUsersOrTeams(serverVM: ServerVM, navHostController: NavHostController)
 {
@@ -328,7 +383,13 @@ fun PrintConnectedUsersOrTeams(serverVM: ServerVM, navHostController: NavHostCon
 
 }
 
-
+/**
+ * Server screen buttons and data
+ *
+ * @param serverVM
+ * @param padding
+ * @param navHostController
+ */
 @Composable
 fun ServerScreenButtonsAndData(serverVM: ServerVM, padding: PaddingValues, navHostController: NavHostController)
 {
@@ -380,11 +441,21 @@ fun ServerScreenButtonsAndData(serverVM: ServerVM, padding: PaddingValues, navHo
     }
 }
 
+/**
+ * Server screen
+ *
+ * @param currLoc
+ * @param currTime
+ * @param serverVM
+ * @param navHostController
+ * @param backHandler
+ * @param changeScreen
+ * @receiver
+ * @receiver
+ */
 @Composable
 fun ServerScreen(currLoc: LiveLocationFromPhone, currTime: LiveTime, serverVM: ServerVM, navHostController: NavHostController, backHandler: () -> Unit, changeScreen: () -> Unit)
 {
-   // val connectionState by serverVM.connectionState.observeAsState()
-   // Log.d("ServerScreen", "Connection state is $connectionState")
 
     TestTheme {
         val scheme = LocalTheme.current

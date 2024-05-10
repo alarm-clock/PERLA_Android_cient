@@ -1,3 +1,8 @@
+/**
+ * @file: BottomBar1.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing bottom bar view
+ */
 package com.example.jmb_bms.view
 
 import androidx.activity.ComponentActivity
@@ -22,6 +27,16 @@ import androidx.compose.ui.unit.dp
 import com.example.jmb_bms.ui.theme.*
 import locus.api.android.utils.LocusUtils
 
+/**
+ * Bottom bar. If you can only pass text or icon for right button. If you don't pass anything only back and map
+ * buttons will be shown on the screen
+ *
+ * @param rButtonText
+ * @param rButtonIcon
+ * @param rButtonStateColor
+ * @param backButtonLogic
+ * @param onClicked
+ */
 @Composable
 fun BottomBar1(rButtonText: String?, rButtonIcon: ImageVector?, rButtonStateColor: ButtonColors,
                backButtonLogic: () -> Unit, onClicked: () -> Unit )

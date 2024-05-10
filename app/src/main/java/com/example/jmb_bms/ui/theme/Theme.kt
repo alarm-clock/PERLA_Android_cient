@@ -1,18 +1,16 @@
+/**
+ * @file: Theme.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing theme related code
+ */
 package com.example.jmb_bms.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 import com.example.jmb_bms.model.utils.MyColorPalette
 
 val darkCianColor = Color(0,90,90)
@@ -80,6 +78,14 @@ val LocalTextfieldTheme = compositionLocalOf<TextFieldColors?>{ null }
 val LocalCheckBoxTheme = compositionLocalOf<CheckboxColors?> { null }
 val LocalSwitchTheme = compositionLocalOf<SwitchColors?> { null }
 val LocalMenuItemsTheme = compositionLocalOf { DarkMenuItemsColors }
+
+/**
+ * Method that enables view recomposition when mode is changed
+ *
+ * @param darkTheme
+ * @param content
+ * @receiver
+ */
 @Composable
 fun TestTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit){
     val colors = if(darkTheme) DarkColorScheme else LightColorScheme

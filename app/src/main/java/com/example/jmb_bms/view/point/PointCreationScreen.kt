@@ -1,3 +1,9 @@
+/**
+ * @file PointCreationScreen.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for all point creation view. This file also contains navigation component
+ * for whole point feature.
+ */
 package com.example.jmb_bms.view.point
 
 import android.content.Intent
@@ -49,7 +55,6 @@ import com.example.jmb_bms.viewModel.point.PointDetailVM
 import locus.api.objects.extra.Location
 import locus.api.objects.geoData.Point
 import java.net.URLEncoder
-
 
 @Composable
 fun PrintLocation(vm: PointCreationVM, scheme: MyColorPalette)

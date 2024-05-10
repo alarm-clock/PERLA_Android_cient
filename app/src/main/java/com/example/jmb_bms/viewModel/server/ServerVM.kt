@@ -204,7 +204,7 @@ class ServerVM(context: Context, pickedTeamId: String?) : ViewModel(), ServiceSt
         service?.unSetCallBack()
         service?.unSetComplexDataCallBack()
         Log.d("ServerVM","In unbindService function ")
-        applicationContext.unbindService(serviceConnection)
+        if(service != null) applicationContext.unbindService(serviceConnection)
         service = null
     }
 

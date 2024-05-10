@@ -1,3 +1,9 @@
+/**
+ * @file ChatRooms.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for all chat rooms view. This file also contains whole navigation
+ * component for chat feature
+ */
 package com.example.jmb_bms.view.chat
 
 import androidx.compose.animation.*
@@ -51,9 +57,6 @@ import com.example.jmb_bms.viewModel.chat.ChatRoomUsersVM
 import com.example.jmb_bms.viewModel.chat.CreateChatRoomVM
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-
-
-//fun LazyListState.isScrolledToStart() = layoutInfo.visibleItemsInfo.firstOrNull()?.index == 0
 
 @Composable
 fun MessageBox(message: ChatMessage)

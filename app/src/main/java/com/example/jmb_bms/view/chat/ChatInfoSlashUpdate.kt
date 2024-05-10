@@ -18,7 +18,6 @@ import com.example.jmb_bms.viewModel.LiveTime
 import com.example.jmb_bms.viewModel.chat.ChatRoomDetailVM
 import com.example.jmb_bms.viewModel.chat.ChatRoomUsersVM
 
-
 @Composable
 fun PrintAllRoomUsers(vm: ChatRoomDetailVM)
 {

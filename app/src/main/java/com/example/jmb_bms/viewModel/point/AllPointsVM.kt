@@ -44,39 +44,9 @@ import locus.api.android.utils.LocusUtils
  */
 class AllPointsVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFieldLeak") val appCtx: Context) : ViewModel(), PointRelatedCallBacks {
 
-    /*
-    private var service : ConnectionService? = null
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, serviceBin: IBinder?) {
-            val binder = serviceBin as ConnectionService.LocalBinder
-            service = binder.getService()
-
-            Log.d("PointCreationVM","Setting myself as callback to $service")
-            service?.setCallBack(this@AllPointsVM)
-            service?.setPointCallBacks(this@AllPointsVM)
-            //service?.setComplexDataCallBack(this@ServerVM)
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            service = null
-        }
-    }
-
-     */
-
     val liveConnectionState = LiveServiceState()
     private val serviceBinder = ServiceBinder(appCtx, listOf(liveConnectionState,this))
 
-    /*
-    private val _connectionState = MutableLiveData<ConnectionState>(ConnectionState.NONE)
-    val connectionState: LiveData<ConnectionState> = _connectionState
-
-    private val _connectionErrorMsg = MutableLiveData("")
-    val connectionErrorMsg: LiveData<String> = _connectionErrorMsg
-
-
-     */
     private val shPref = appCtx.getSharedPreferences("Point_Menu", Context.MODE_PRIVATE)
 
     val shownPoints = MutableStateFlow<List<PointMenuRow>?>(null)
@@ -404,44 +374,6 @@ class AllPointsVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFiel
         }
     }
 
-    /*
-    override fun onOnServiceStateChanged(newState: ConnectionState) {
-        if(newState == _connectionState.value) return
-        _connectionState.postValue(newState)
-    }
-
-    override fun onServiceErroStringChange(new: String) {
-        _connectionErrorMsg.postValue(new)
-    }
-
-     */
-
-    /*
-    fun bind()
-    {
-        if(service != null) return
-
-        val running = appCtx.getSharedPreferences("jmb_bms_Server_Info", Context.MODE_PRIVATE).getBoolean("Service_Running",false)
-
-        if(!running) return
-        Log.d("PointCreationVM", "Binding to service")
-        val intent = Intent(appCtx, ConnectionService::class.java).putExtra("Caller","CreatePoint")
-        appCtx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-    }
-
-    fun unbind()
-    {
-        service?.unSetCallBack()
-        service?.unsetPointCallBacks()
-
-        if( service != null)
-        {
-            appCtx.unbindService(serviceConnection)
-        }
-        service = null
-    }
-
-     */
     override fun onCleared() {
         super.onCleared()
         //unbind()
@@ -489,5 +421,14 @@ class AllPointsVM(private val dbHelper: PointDBHelper, @SuppressLint("StaticFiel
                 shownPoints.value = tmp
             }
         }
+    }
+
+    /**
+     * Method that sends point sync request to server
+     *
+     */
+    fun manuallySync()
+    {
+        serviceBinder.service?.manuallySyncPoints()
     }
 }

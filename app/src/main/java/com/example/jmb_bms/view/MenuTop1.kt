@@ -1,3 +1,8 @@
+/**
+ * @file: MenuTop1.kt
+ * @author: Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing menu tops and time and location function
+ */
 package com.example.jmb_bms.view
 
 import androidx.compose.foundation.background

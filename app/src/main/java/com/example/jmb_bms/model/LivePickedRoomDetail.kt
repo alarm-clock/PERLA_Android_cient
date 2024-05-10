@@ -21,7 +21,6 @@ class LivePickedRoomDetail(roomId: String, val dbHelper: ChatDBHelper, val liveU
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
-            Log.d("HEREEEEEEEEE","Hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
             Log.d("roomId",roomId)
             dbHelper.getChatRoom(roomId)?.let {
                 Log.d("Init","chat row was not null")

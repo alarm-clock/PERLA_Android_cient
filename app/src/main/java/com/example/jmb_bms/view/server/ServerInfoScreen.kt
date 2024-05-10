@@ -1,5 +1,10 @@
+/**
+ * @file ServerInfoScreen.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for server info screen. This file also contains
+ * navigation function for whole server feature
+ */
 package com.example.jmb_bms.view.server
-
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
@@ -36,7 +41,15 @@ import com.example.jmb_bms.ui.theme.*
 import com.example.jmb_bms.view.MenuTop2
 import com.example.jmb_bms.viewModel.server.ServerVM
 
-
+/**
+ * Custom dropdown menu
+ *
+ * @param menuLabel
+ * @param vm
+ * @param items
+ * @param state
+ * @param onCLick
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyDropdownMenu(menuLabel: String, vm: SymbolCreationVMHelper, items: List<OpenableMenuItem>, state: MutableState<OpenableMenuItem>, onCLick: (vm : SymbolCreationVMHelper, item: OpenableMenuItem ) -> Unit) {
@@ -90,6 +103,11 @@ fun MyDropdownMenu(menuLabel: String, vm: SymbolCreationVMHelper, items: List<Op
     }
 }
 
+/**
+ * Input fields for host, port, and name
+ *
+ * @param serverInfoVM
+ */
 @Composable
 fun InputFields(serverInfoVM: ServerInfoVM)
 {
@@ -125,6 +143,11 @@ fun InputFields(serverInfoVM: ServerInfoVM)
     )
 }
 
+/**
+ * Icon creation cascade. Dropdown menus that are added or removed based on the previous choices
+ *
+ * @param symbolCreationVMHelper
+ */
 @Composable
 fun IconCreationCascade(symbolCreationVMHelper: SymbolCreationVMHelper)//serverInfoVM: ServerInfoVM)
 {
@@ -161,7 +184,13 @@ fun IconCreationCascade(symbolCreationVMHelper: SymbolCreationVMHelper)//serverI
     }
 }
 
-
+/**
+ * Input server info screen
+ *
+ * @param serverInfoVM
+ * @param padding
+ * @param scheme
+ */
 @Composable
 fun InputInfoScreen(serverInfoVM: ServerInfoVM, padding: PaddingValues, scheme: MyColorPalette)
 {
@@ -178,6 +207,15 @@ fun InputInfoScreen(serverInfoVM: ServerInfoVM, padding: PaddingValues, scheme: 
     }
 }
 
+/**
+ * Server info input screen containing input fields and icon creation menu
+ *
+ * @param currTime
+ * @param currLoc
+ * @param serverInfoVM
+ * @param backHandler
+ * @param getToNextScreen
+ */
 @Composable
 fun ServerInfoInputScreen(currTime: LiveTime, currLoc: LiveLocationFromPhone, serverInfoVM: ServerInfoVM, backHandler: () -> Unit, getToNextScreen: () -> Unit)
 {
@@ -229,6 +267,15 @@ fun ServerInfoInputScreen(currTime: LiveTime, currLoc: LiveLocationFromPhone, se
     }
 }
 
+/**
+ * Server info input screen with added theme
+ *
+ * @param currTime
+ * @param currLoc
+ * @param serverInfoVM
+ * @param backHandler
+ * @param getToNextScreen
+ */
 @Composable
 fun ServerInfoInputScreenWithTheme(currTime: LiveTime, currLoc: LiveLocationFromPhone, serverInfoVM: ServerInfoVM, backHandler: () -> Unit, getToNextScreen: () -> Unit)
 {
@@ -237,7 +284,14 @@ fun ServerInfoInputScreenWithTheme(currTime: LiveTime, currLoc: LiveLocationFrom
     }
 }
 
-
+/**
+ * Method with all views for server feature. It holds whole navigation component and all endpoints.
+ *
+ * @param currTime
+ * @param currLoc
+ * @param backHandler
+ * @receiver
+ */
 @Composable
 fun ServerService(currTime: LiveTime, currLoc: LiveLocationFromPhone, /*serverInfoVM: ServerInfoVM, serverVM: ServerVM,*/ backHandler: () -> Unit)
 {

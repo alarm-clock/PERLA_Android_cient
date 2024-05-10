@@ -1,3 +1,8 @@
+/**
+ * @file Video.kt
+ * @author Jozef Michal Bukas <xbukas00@stud.fit.vutbr.cz,jozefmbukas@gmail.com>
+ * Description: File containing composable functions for all video view
+ */
 package com.example.jmb_bms.view.point
 
 import android.net.Uri
